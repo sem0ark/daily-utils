@@ -63,16 +63,11 @@ function Home() {
           Utility script that just outputs the text back to the user in order to
           translate it with Google Translate plugin. It is useful because like
           that there will be no character limit that breaks the translation.
-          <br />
-          It also includes functionality to copy the processed text to
-          clipboard, optionally wrapped into a custom text for prompts.
         </Card>
 
         <Card name="Text to promts" path="/prompts">
-          It is useful because like that there will be no character limit that
-          breaks the translation. It also includes functionality to copy the
-          processed text to clipboard, optionally wrapped into a custom text for
-          prompts.
+          It includes functionality to copy the processed text to clipboard,
+          optionally wrapped into a custom text for prompts.
         </Card>
       </div>
     </>

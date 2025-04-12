@@ -92,7 +92,9 @@ export function TextToPrompt() {
 
   return (
     <>
-      <h1 className="mb-8 w-full text-center text-3xl font-bold">Echo Text</h1>
+      <h1 className="mb-8 w-full text-center text-3xl font-bold">
+        Text to promts
+      </h1>
 
       <div className="w-full">
         <p className="font-bold text-blue-500">
