@@ -32,7 +32,7 @@ function escapeDollar(text: string): string {
 }
 
 function escapeGenerics(text: string): string {
-  return text.replace(/<([^>\s]+)>/g, "< $1 >");
+  return text.replace(/</g, " < ").replace(/>/g, " > ");
 }
 
 function replaceUnicode(text: string): string {
