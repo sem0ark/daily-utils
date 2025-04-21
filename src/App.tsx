@@ -5,6 +5,7 @@ import { EchoText } from "./pages/EchoText";
 import { HomeIcon, ArrowRightIcon } from "@heroicons/react/24/solid";
 import { PropsWithChildren } from "react";
 import { TextToPrompt } from "./pages/TextToPrompt";
+import { FormatMarkdown } from "./pages/FormatMarkdown";
 
 function Layout() {
   return (
@@ -30,7 +31,7 @@ function Card({
   children,
 }: PropsWithChildren<{ name: string; path: string }>) {
   return (
-    <div className="mx-auto w-fit max-w-lg rounded-lg border-2 border-neutral-500 bg-neutral-50 p-4">
+    <div className="mx-auto w-full max-w-lg rounded-lg border-2 border-neutral-500 bg-neutral-50 p-4">
       <Link
         to={path}
         className="text-xl font-bold text-blue-500"
@@ -69,6 +70,10 @@ function Home() {
           It includes functionality to copy the processed text to clipboard,
           optionally wrapped into a custom text for prompts.
         </Card>
+
+        <Card name="Fromat markdown" path="/markdown">
+          Fromat markdown to not use * for lists and replace _ for italics.
+        </Card>
       </div>
     </>
   );
@@ -83,6 +88,7 @@ export function App() {
           <Route path="home" element={<Home />} />
           <Route path="echo" element={<EchoText />} />
           <Route path="prompts" element={<TextToPrompt />} />
+          <Route path="markdown" element={<FormatMarkdown />} />
         </Route>
       </Routes>
     </HashRouter>
