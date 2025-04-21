@@ -1,70 +1,61 @@
-import clsx from "clsx";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  divideMarkdown,
-  populateTemplate,
-  preprocessText,
-  restoreText,
-} from "../text-processing";
-import { CopyToClipboard } from "../components/buttons";
+import { CopyTextEntry } from "../components/copyTextEntry";
+import { preprocessText, restoreText } from "../text-processing";
 
-function TextEntry({ template }: { template: string }) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const destinationRef = useRef<HTMLDivElement>(null);
+function populateTemplate(text: string, replacement: string = ""): string {
+  const emptyTripleQuotesRegex = /"""\n*"""/g;
+  return text.replace(emptyTripleQuotesRegex, () => `"""\n${replacement}\n"""`);
+}
 
-  const [showAll, setShowAll] = useState(true);
+function divideMarkdown(markdownText: string): string[] {
+  const sections: string[] = [];
+  let currentSection: string[] = [];
+  let wordCount = 0;
 
-  const getText = useCallback((): string => {
-    if (!destinationRef.current) return "";
-    const content = destinationRef.current.innerHTML;
-    const text = restoreText(content ?? "");
-    return divideMarkdown(text)
-      .map((entry) => populateTemplate(template ?? '""""""', entry))
-      .join("\n".repeat(40));
-  }, [template]);
+  const lines = markdownText.split("\n");
+  const headingRegex = /^(#|##)\s+(.*)$/;
+  const codeBlockRegex = /^```/;
+  let inCodeBlock = false;
 
-  const handleBlur = useCallback(() => {
-    if (!textareaRef.current) return;
-    if (!destinationRef.current) return;
-    destinationRef.current.innerHTML = preprocessText(
-      textareaRef.current.value,
-    ).replace(/\n/g, "<br>");
-  }, []);
+  const countWords = (text: string): number => {
+    return text.split(/[^\w']+/).filter((word) => word.length > 0).length;
+  };
 
-  return (
-    <div className="relative min-h-32 rounded-xl border-2 border-neutral-500 p-2">
-      <div className="flex w-full flex-col gap-2 px-2">
-        <p className="font-bold text-blue-500">Enter your text here:</p>
-        <textarea
-          ref={textareaRef}
-          name="entered text"
-          className="w-40 scroll-m-0 rounded-lg border-2 border-neutral-500 bg-neutral-100 p-4 ring-0 outline-none"
-          onBlur={handleBlur}
-        ></textarea>
+  for (const line of lines) {
+    const headingMatch = line.match(headingRegex);
 
-        <div className="absolute right-2 bottom-2 flex flex-col items-end gap-1 bg-transparent">
-          <CopyToClipboard
-            getText={getText}
-            className="w-fit rounded-lg border-2 border-neutral-500 bg-neutral-100 p-1 font-bold text-blue-500 transition-all hover:gap-4 hover:border-blue-600 hover:text-blue-600"
-          />
-          <button
-            onClick={() => setShowAll((a) => !a)}
-            className="w-fit rounded-lg border-2 border-neutral-500 bg-neutral-100 p-1 font-bold text-blue-500 transition-all hover:gap-4 hover:border-blue-600 hover:text-blue-600"
-          >
-            {showAll ? "Hide" : "Show"}
-          </button>
-        </div>
-      </div>
+    if (codeBlockRegex.test(line)) {
+      inCodeBlock = !inCodeBlock;
+      currentSection.push(line);
+      continue;
+    }
 
-      <div
-        ref={destinationRef}
-        className={clsx(
-          "w-full overflow-hidden p-2 text-[6px]",
-          !showAll && "max-h-40",
-        )}
-      ></div>
-    </div>
-  );
+    if (inCodeBlock) {
+      currentSection.push(line);
+      continue;
+    }
+
+    const lineWordCount = countWords(line);
+    wordCount += lineWordCount;
+
+    if (
+      headingMatch &&
+      (headingMatch[1] === "#" || headingMatch[1] === "##") &&
+      wordCount > 1000
+    ) {
+      sections.push(currentSection.join("\n"));
+      currentSection = [line];
+      wordCount = lineWordCount;
+    } else {
+      currentSection.push(line);
+    }
+  }
+
+  if (currentSection.length > 0) {
+    sections.push(currentSection.join("\n"));
+  }
+
+  return sections;
 }
 
 export function TextToPrompt() {
@@ -115,7 +106,16 @@ export function TextToPrompt() {
 
       <div className="my-5 flex flex-col gap-4">
         {Array.from(Array(count)).map((_, index) => (
-          <TextEntry template={template ?? ""} key={index} />
+          <CopyTextEntry
+            key={index}
+            onBlur={preprocessText}
+            onCopy={(content: string) => {
+              const text = restoreText(content ?? "");
+              return divideMarkdown(text)
+                .map((entry) => populateTemplate(template ?? '""""""', entry))
+                .join("\n".repeat(40));
+            }}
+          />
         ))}
       </div>
 
