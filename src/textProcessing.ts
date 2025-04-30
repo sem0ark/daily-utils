@@ -52,12 +52,16 @@ export function preprocessText(text: string): string {
 }
 
 export function restoreText(text: string): string {
-  return text
-    .replace(/&lt;/g, " < ")
-    .replace(/&gt;/g, " > ")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/<br>/g, "\n")
-    .replace(/<\/pre>/g, "")
-    .replace(/<pre>/g, "");
+  let temp_text: string = text;
+
+  temp_text = temp_text.replace(/&lt;/g, " < ");
+  temp_text = temp_text.replace(/&gt;/g, " > ");
+  temp_text = temp_text.replace(/&quot;/g, '"');
+  temp_text = temp_text.replace(/&#39;/g, "'");
+  temp_text = temp_text.replace(/&amp;/g, '&');
+  temp_text = temp_text.replace(/<br>/g, "\n");
+  temp_text = temp_text.replace(/<\/pre>/g, "");
+  temp_text = temp_text.replace(/<pre>/g, "");
+
+  return temp_text;
 }

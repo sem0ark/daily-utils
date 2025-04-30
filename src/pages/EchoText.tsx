@@ -1,10 +1,6 @@
 import { useCallback, useState } from "react";
-import { preprocessText, restoreText } from "../text-processing";
+import { preprocessText, restoreText } from "../textProcessing";
 import { CopyTextEntry } from "../components/copyTextEntry";
-
-function removeMarkdownEmphasis(text: string): string {
-  return text.replace(/\*\*(.*?)\*\*/gm, "$1").replace(/_(.*?)_/gm, "$1");
-}
 
 export function EchoText() {
   const [count, setCount] = useState(1);
@@ -18,7 +14,7 @@ export function EchoText() {
         {Array.from(Array(count)).map((_, index) => (
           <CopyTextEntry
             key={index}
-            onBlur={(text) => removeMarkdownEmphasis(preprocessText(text))}
+            onBlur={(text) => preprocessText(text)}
             onCopy={restoreText}
           />
         ))}

@@ -1,10 +1,10 @@
 import { useCallback, useState } from "react";
 import { CopyTextEntry } from "../components/copyTextEntry";
-import { preprocessText, restoreText } from "../text-processing";
+import { preprocessText, restoreText } from "../textProcessing";
 
 function replaceMarkdownElements(text: string) {
   return text
-    .replace(/\n\* {1,}/g, "- ")
+    .replace(/\n\* {1,}/g, "\n- ")
     .replace(/( {4}|\t)\* {1,}/g, "    - ")
     .replace(/( {4}|\t)/g, "   ")
     .replace(/(\s*)(\d*\.) {2,}/gm, "$1$2 ");
