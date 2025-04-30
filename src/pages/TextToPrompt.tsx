@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CopyTextEntry } from "../components/copyTextEntry";
-import { preprocessText, restoreText } from "../text-processing";
+import { preprocessText, restoreText } from "../textProcessing";
 
 function populateTemplate(text: string, replacement: string = ""): string {
   const emptyTripleQuotesRegex = /"""\n*"""/g;
