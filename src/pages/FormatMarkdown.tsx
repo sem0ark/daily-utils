@@ -28,7 +28,7 @@ export function FormatMarkdown() {
         {Array.from(Array(count)).map((_, index) => (
           <CopyTextEntry
             key={index}
-            onBlur={preprocessText}
+            onPaste={preprocessText}
             onCopy={(text) => replaceMarkdownElements(restoreText(text))}
           />
         ))}

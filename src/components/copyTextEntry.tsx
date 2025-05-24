@@ -1,15 +1,39 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CopyToClipboard } from "./buttons";
 
-export function CopyTextEntry({
+
+const usePasteFromClipboard = () => {
+  const [isPasted, setIsPasted] = useState(false);
+  const [text, setText] = useState("");
+
+  const onClick = useCallback(async () => {
+    try {
+      const copiedText = await navigator.clipboard.readText();
+      setIsPasted(true);
+      setText(copiedText);
+      setTimeout(() => setIsPasted(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  }, [setIsPasted, setText]);
+
+  return {
+    onClick,
+    isPasted,
+    text,
+  }
+}
+
+export const CopyTextEntry = ({
   onCopy,
-  onBlur,
+  onPaste,
 }: {
   onCopy: (text: string) => string;
-  onBlur: (text: string) => string;
-}) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  onPaste: (text: string) => string;
+}) => {
+  const { onClick: copyFromClipboard, text: pastedText, isPasted } = usePasteFromClipboard();
   const destinationRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const getText = useCallback((): string => {
     if (!destinationRef.current) return "";
@@ -17,11 +41,16 @@ export function CopyTextEntry({
     return onCopy(content);
   }, [onCopy]);
 
+  useEffect(() => {
+    if (!destinationRef.current) return;
+    destinationRef.current.innerHTML = onPaste(pastedText ?? "");
+  }, [onPaste, pastedText]);
+
   const handleBlur = useCallback(() => {
     if (!textareaRef.current) return;
     if (!destinationRef.current) return;
-    destinationRef.current.innerHTML = onBlur(textareaRef.current.value ?? "");
-  }, [onBlur]);
+    destinationRef.current.innerHTML = onPaste(textareaRef.current.value ?? "");
+  }, [onPaste]);
 
   return (
     <div className="relative min-h-32 rounded-xl border-2 border-neutral-500 p-2">
@@ -30,14 +59,20 @@ export function CopyTextEntry({
         <textarea
           ref={textareaRef}
           name="entered text"
-          className="w-40 scroll-m-0 rounded-lg border-2 border-neutral-500 bg-neutral-100 p-4 ring-0 outline-none"
+          className="w-full scroll-m-0 rounded-lg border-2 border-neutral-500 bg-neutral-100 p-4 ring-0 outline-none"
           onBlur={handleBlur}
         ></textarea>
+
+        <button
+          onClick={copyFromClipboard}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-neutral-500 bg-neutral-100 p-2 text-center text-xl font-bold text-blue-500 transition-all duration-400 hover:gap-4 hover:border-neutral-100 hover:text-blue-600"
+        >
+          {isPasted ? "Pasted!" : "Paste from Clipboard" }
+        </button>
 
         <div className="absolute right-2 bottom-2 flex flex-col items-end gap-1 bg-transparent">
           <CopyToClipboard
             getText={getText}
-            className="w-fit rounded-lg border-2 border-neutral-500 bg-neutral-100 p-1 font-bold text-blue-500 transition-all hover:gap-4 hover:border-blue-600 hover:text-blue-600"
           />
         </div>
       </div>

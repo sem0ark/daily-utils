@@ -108,7 +108,7 @@ export function TextToPrompt() {
         {Array.from(Array(count)).map((_, index) => (
           <CopyTextEntry
             key={index}
-            onBlur={preprocessText}
+            onPaste={preprocessText}
             onCopy={(content: string) => {
               const text = restoreText(content ?? "");
               return divideMarkdown(text)

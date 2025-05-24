@@ -14,7 +14,7 @@ export function EchoText() {
         {Array.from(Array(count)).map((_, index) => (
           <CopyTextEntry
             key={index}
-            onBlur={(text) => preprocessText(text)}
+            onPaste={(text) => preprocessText(text)}
             onCopy={restoreText}
           />
         ))}
