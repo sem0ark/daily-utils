@@ -9,50 +9,48 @@ function populateTemplate(text: string, replacement: string = ""): string {
 
 function divideMarkdown(markdownText: string): string[] {
   const sections: string[] = [];
-  let currentSection: string[] = [];
-  let wordCount = 0;
+  const mainSections = markdownText.split(/(?=^#\s+(.*))/m).filter(t => t.startsWith("#"))
 
-  const lines = markdownText.split("\n");
-  const headingRegex = /^(#|##)\s+(.*)$/;
-  const codeBlockRegex = /^```/;
-  let inCodeBlock = false;
+  for(const sectionText of mainSections) {
+    let currentSection: string[] = [];
+    let wordCount = 0;
 
-  const countWords = (text: string): number => {
-    return text.split(/[^\w']+/).filter((word) => word.length > 0).length;
-  };
+    const lines = sectionText.split("\n");
+    const headingRegex = /^##\s+(.*)$/;
+    const codeBlockRegex = /^```/;
+    let inCodeBlock = false;
 
-  for (const line of lines) {
-    const headingMatch = line.match(headingRegex);
+    const countWords = (text: string): number => {
+      return text.split(/[^\w']+/).filter((word) => word.length > 0).length;
+    };
 
-    if (codeBlockRegex.test(line)) {
-      inCodeBlock = !inCodeBlock;
-      currentSection.push(line);
-      continue;
+    for (const line of lines) {
+      if (codeBlockRegex.test(line)) {
+        inCodeBlock = !inCodeBlock;
+        currentSection.push(line);
+        continue;
+      }
+
+      if (inCodeBlock) {
+        currentSection.push(line);
+        continue;
+      }
+
+      const lineWordCount = countWords(line);
+      wordCount += lineWordCount;
+
+      if (headingRegex.test(line) && wordCount > 2000) {
+        sections.push(currentSection.join("\n"));
+        currentSection = [line];
+        wordCount = lineWordCount;
+      } else {
+        currentSection.push(line);
+      }
     }
 
-    if (inCodeBlock) {
-      currentSection.push(line);
-      continue;
-    }
-
-    const lineWordCount = countWords(line);
-    wordCount += lineWordCount;
-
-    if (
-      headingMatch &&
-      (headingMatch[1] === "#" || headingMatch[1] === "##") &&
-      wordCount > 1000
-    ) {
+    if (currentSection.length > 0) {
       sections.push(currentSection.join("\n"));
-      currentSection = [line];
-      wordCount = lineWordCount;
-    } else {
-      currentSection.push(line);
     }
-  }
-
-  if (currentSection.length > 0) {
-    sections.push(currentSection.join("\n"));
   }
 
   return sections;
