@@ -7,6 +7,10 @@ import { FormatMarkdown } from "./routes/FormatMarkdown";
 import { PDFLayout } from "./routes/process-pdf/PDFLayout";
 import { pdfjs } from "react-pdf";
 import { PDFHome } from "./routes/process-pdf/PDFHome";
+import { SplitPdfPage } from "./routes/process-pdf/SplitPDF";
+
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -22,7 +26,7 @@ export function App() {
           <Route path="markdown" element={<FormatMarkdown />} />
           <Route path="pdf-processing" element={<PDFLayout />}>
             <Route index element={<PDFHome />} />
-            <Route path="pdf-split" element={<div />} />
+            <Route path="pdf-split" element={<SplitPdfPage />} />
             <Route path="pdf-replace" element={<div />} />
             <Route path="pdf-replace" element={<div />} />
           </Route>

@@ -7,11 +7,11 @@ export const LinkCard = ({
   path,
   children,
 }: PropsWithChildren<{ name: string; path: string }>) => (
-  <Link to={path} className="group mx-auto w-full max-w-lg rounded-lg border-2 border-neutral-500 bg-neutral-50 p-4">
-    <div
-      className="text-xl font-bold text-blue-500"
-      title={"Go to " + name}
-    >
+  <Link
+    to={path}
+    className="group mx-auto w-full max-w-lg rounded-lg border-2 border-neutral-500 bg-neutral-50 p-4"
+  >
+    <div className="text-xl font-bold text-blue-500" title={"Go to " + name}>
       {name}
     </div>
 

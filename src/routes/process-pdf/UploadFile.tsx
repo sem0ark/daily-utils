@@ -36,7 +36,7 @@ export const FileUpload = ({
       }
     }
 
-    onFileUpload(validFiles)
+    onFileUpload(validFiles);
   };
 
   const openFileExplorer = () => {
