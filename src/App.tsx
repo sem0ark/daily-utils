@@ -6,6 +6,7 @@ import { TextToPrompt } from "./routes/TextToPrompt";
 import { FormatMarkdown } from "./routes/FormatMarkdown";
 import { PDFLayout } from "./routes/process-pdf/PDFLayout";
 import { pdfjs } from "react-pdf";
+import { PDFHome } from "./routes/process-pdf/PDFHome";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -20,7 +21,10 @@ export function App() {
           <Route path="prompts" element={<TextToPrompt />} />
           <Route path="markdown" element={<FormatMarkdown />} />
           <Route path="pdf-processing" element={<PDFLayout />}>
-            <Route index element={<div />} />
+            <Route index element={<PDFHome />} />
+            <Route path="pdf-split" element={<div />} />
+            <Route path="pdf-replace" element={<div />} />
+            <Route path="pdf-replace" element={<div />} />
           </Route>
         </Route>
       </Routes>

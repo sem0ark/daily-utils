@@ -58,7 +58,7 @@ export function restoreText(text: string): string {
   temp_text = temp_text.replace(/&gt;/g, " > ");
   temp_text = temp_text.replace(/&quot;/g, '"');
   temp_text = temp_text.replace(/&#39;/g, "'");
-  temp_text = temp_text.replace(/&amp;/g, '&');
+  temp_text = temp_text.replace(/&amp;/g, "&");
   temp_text = temp_text.replace(/<br>/g, "\n");
   temp_text = temp_text.replace(/<\/pre>/g, "");
   temp_text = temp_text.replace(/<pre>/g, "");

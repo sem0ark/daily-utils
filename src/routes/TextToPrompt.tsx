@@ -9,9 +9,11 @@ function populateTemplate(text: string, replacement: string = ""): string {
 
 function divideMarkdown(markdownText: string): string[] {
   const sections: string[] = [];
-  const mainSections = markdownText.split(/(?=^#\s+(.*))/m).filter(t => t.startsWith("#"))
+  const mainSections = markdownText
+    .split(/(?=^#\s+(.*))/m)
+    .filter((t) => t.startsWith("#"));
 
-  for(const sectionText of mainSections) {
+  for (const sectionText of mainSections) {
     let currentSection: string[] = [];
     let wordCount = 0;
 

@@ -1,6 +1,6 @@
 import { ArrowUpTrayIcon } from "@heroicons/react/16/solid";
 import clsx from "clsx";
-import { useState, useRef, ChangeEvent, useCallback } from "react";
+import { useState, useRef } from "react";
 
 const validateFile = (
   file: File | null,
@@ -18,24 +18,25 @@ export const FileUpload = ({
   allowedFileTypes = ["application/pdf"],
   className,
 }: {
-  onFileUpload: (file: File) => void;
+  onFileUpload: (file: File[]) => void;
   allowedFileTypes?: string[];
   className: string;
 }) => {
   const [highlight, setHighlight] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = useCallback(
-    (file: File | null) => {
-      if (file && validateFile(file, allowedFileTypes)) onFileUpload(file);
-    },
-    [onFileUpload, allowedFileTypes],
-  );
+  const handleFiles = (files: FileList | null) => {
+    if (!(files && files.length)) return;
 
-  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      for (const file of e.target.files) handleFile(file);
+    const validFiles: File[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (file && validateFile(file, allowedFileTypes)) {
+        validFiles.push(file);
+      }
     }
+
+    onFileUpload(validFiles)
   };
 
   const openFileExplorer = () => {
@@ -45,7 +46,8 @@ export const FileUpload = ({
   return (
     <div
       className={clsx(
-        className, "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-6 transition-colors duration-200",
+        className,
+        "group flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 px-6 py-6 duration-100 hover:border-3",
         highlight
           ? "border-blue-500 bg-blue-50"
           : "border-neutral-300 bg-white hover:border-neutral-400",
@@ -70,37 +72,21 @@ export const FileUpload = ({
         e.stopPropagation();
         setHighlight(false);
         if (e.dataTransfer.files) {
-          for (const file of e.dataTransfer.files) handleFile(file);
+          handleFiles(e.dataTransfer.files);
           e.dataTransfer.clearData();
         }
       }}
       onClick={openFileExplorer}
     >
-      <ArrowUpTrayIcon className="size-10"/>
+      <ArrowUpTrayIcon className="size-10 duration-100 group-hover:scale-110" />
       <input
         type="file"
         ref={fileInputRef}
-        onChange={handleFileSelect}
+        onChange={(e) => handleFiles(e.target.files)}
         accept={allowedFileTypes.join(",")}
         className="hidden"
+        multiple={true}
       />
     </div>
   );
 };
-
-// export const PDFUpload = () => {
-//   const handlePdfFileSelect = (file: File | null) => {
-//     if (file) {
-//       console.log(
-//         "PDF File selected in App.tsx:",
-//         file.name,
-//         file.type,
-//         file.size,
-//       );
-//     } else {
-//       console.log("PDF File cleared in App.tsx");
-//     }
-//   };
-
-//   return <FileUpload onFileUpload={handlePdfFileSelect} />;
-// };
