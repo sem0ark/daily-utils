@@ -11,6 +11,7 @@ import { SplitPdfPage } from "./routes/process-pdf/SplitPDF";
 
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
+import { JoinPdfPage } from "./routes/process-pdf/JoinPDF";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -27,7 +28,7 @@ export function App() {
           <Route path="pdf-processing" element={<PDFLayout />}>
             <Route index element={<PDFHome />} />
             <Route path="pdf-split" element={<SplitPdfPage />} />
-            <Route path="pdf-replace" element={<div />} />
+            <Route path="pdf-join" element={<JoinPdfPage />} />
             <Route path="pdf-replace" element={<div />} />
           </Route>
         </Route>

@@ -58,11 +58,9 @@ const PdfSplitRangePreview = ({ targetFile }: { targetFile: PDFFile }) => {
   const [pdfLoading, setPdfLoading] = useState(true);
   const [pdfError, setPdfError] = useState<string | null>(null);
 
-  // State for the currently displayed preview pages for a *single* range input
   const [regionStartPage, setRegionStartPage] = useState<number>(1);
   const [regionEndPage, setRegionEndPage] = useState<number>(1);
 
-  // Memoize the rendered PDF document for performance (main document loading)
   const pdfLoader = useMemo(() => {
     if (!targetFile) return null;
     return (
@@ -72,17 +70,14 @@ const PdfSplitRangePreview = ({ targetFile }: { targetFile: PDFFile }) => {
           setNumPages(numPages);
           setPdfLoading(false);
           setPdfError(null);
-          console.log("Loaded!!", numPages);
         }}
         onLoadError={(error) => {
-          console.error("Error loading PDF:", error);
+          console.error("Error loading PDF: ", error);
           setPdfError("Failed to load PDF for preview. " + error.message);
           setPdfLoading(false);
         }}
         className="hidden"
       >
-        {/* Used only to initialize the number of pages */}
-        {/* Page previews will be handled below */}
       </Document>
     );
   }, [targetFile]);
@@ -95,18 +90,13 @@ const PdfSplitRangePreview = ({ targetFile }: { targetFile: PDFFile }) => {
     <>
       {pdfLoader}
       <div className="m-auto grid w-xl grid-cols-2 flex-col justify-center gap-2">
-        <h3 className="mb-2 w-full text-center text-lg font-semibold">
-          Start Page Preview
-        </h3>
-        <h3 className="mb-2 w-full text-center text-lg font-semibold">
-          End Page Preview
-        </h3>
+        <h3 className="mb-2 w-full text-center text-lg font-semibold">Start Page Preview</h3>
+        <h3 className="mb-2 w-full text-center text-lg font-semibold">End Page Preview</h3>
+
         <div className="flex flex-col items-center">
           <div
             className="relative flex h-fit items-center justify-center overflow-hidden rounded-md border-2 border-neutral-300 bg-white p-2"
-            style={{
-              width: `${PDF_PREVIEW_WIDTH}px`,
-            }}
+            style={{width: `${PDF_PREVIEW_WIDTH}px`}}
           >
             {pdfLoading && <p className="text-neutral-500">Loading PDF...</p>}
             {pdfError && <p className="text-red-500">{pdfError}</p>}
@@ -122,6 +112,7 @@ const PdfSplitRangePreview = ({ targetFile }: { targetFile: PDFFile }) => {
             )}
           </div>
         </div>
+
         <div className="flex flex-col items-center">
           <div
             className="relative flex items-center justify-center overflow-hidden rounded-md border-2 border-neutral-300 bg-white p-2"

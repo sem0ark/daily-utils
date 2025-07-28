@@ -17,9 +17,7 @@ export type Command =
   | ExtractRegionCommand
   | JoinPDFCommand
   | PDFReplaceTextCommand
-  | AdjustPDFDimensionsCommand;
 
-// Define specific command types extending the base Command interface
 export type ExtractRegionCommand = {
   type: "ExtractRegion";
   start: number;
@@ -28,7 +26,7 @@ export type ExtractRegionCommand = {
 
 export type JoinPDFCommand = {
   type: "JoinPDF";
-  inputFiles: PDFFile[]; // The PDFFile entries to be joined
+  sourceFiles: PDFFile[];
 };
 
 export type PDFReplaceTextCommand = {
@@ -36,13 +34,7 @@ export type PDFReplaceTextCommand = {
   pattern: string;
   replacement: string;
   adjustHorizontally: "right" | "center" | "left";
-  adjustVertically: "top" | "center" | "bottom"; // Changed to standard vertical alignments
-};
-
-export type AdjustPDFDimensionsCommand = {
-  type: "AdjustPDFDimensions"; // Corrected typo here
-  adjustBy: "width" | "height";
-  value: number; // Value to adjust by
+  adjustVertically: "top" | "center" | "bottom";
 };
 
 const getPDFStore = () =>
@@ -118,13 +110,6 @@ const getPDFStore = () =>
           });
         },
 
-        ensureSingleSelected: () =>
-          set((state) => {
-            for (const file of get().selectedFiles.slice(1)) {
-              state.actions.deselectFile(file.key);
-            }
-          }),
-
         deselectFile: (key: string) =>
           set((state) => {
             const file = state.selectedFiles.find((f) => f.key === key);
@@ -157,6 +142,21 @@ const getPDFStore = () =>
             });
           }),
 
+        addJoinPdfFiles: (sourceFiles: PDFFile[]) =>
+          set(({ files }) => {
+            files.unshift({
+              rawFile: sourceFiles[0].rawFile,
+              key: uuidv4(),
+              name: `${sourceFiles.map(f => f.name.replace(/.pdf$/, "")).join("_")}_[joined].pdf`,
+              commands: [
+                {
+                  type: "JoinPDF",
+                  sourceFiles: sourceFiles
+                }
+              ]
+            });
+          }),
+
         downloadFile: async (fileKey: string) => {
           const targetFileEntry =
             get().files.find((f) => f.key === fileKey) ||
@@ -183,5 +183,4 @@ const usePDFStore = create(immer(getPDFStore()));
 
 export const usePdfStoreActions = () => usePDFStore((store) => store.actions);
 export const usePdfStoreFiles = () => usePDFStore((store) => store.files);
-export const usePdfStoreSelectedFiles = () =>
-  usePDFStore((store) => store.selectedFiles);
+export const usePdfStoreSelectedFiles = () => usePDFStore((store) => store.selectedFiles);

@@ -5,7 +5,11 @@ export const PDFHome = () => {
     <>
       <h1 className="mb-8 w-full text-center text-3xl font-bold">PDF Utils</h1>
       <div className="grid items-center gap-8 pb-48">
-        <LinkCard name="Split PDF" path="/pdf-processing/pdf-split"></LinkCard>
+        <LinkCard name="Split PDF by Ranges" path="/pdf-processing/pdf-split"></LinkCard>
+        <LinkCard
+          name="Join PDF"
+          path="/pdf-processing/pdf-join"
+        ></LinkCard>
         <LinkCard
           name="Replace PDF Text"
           path="/pdf-processing/pdf-split"

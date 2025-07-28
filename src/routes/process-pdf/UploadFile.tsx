@@ -73,7 +73,7 @@ export const FileUpload = ({
         setHighlight(false);
         if (e.dataTransfer.files) {
           handleFiles(e.dataTransfer.files);
-          e.dataTransfer.clearData();
+          e.dataTransfer.clearData()
         }
       }}
       onClick={openFileExplorer}
