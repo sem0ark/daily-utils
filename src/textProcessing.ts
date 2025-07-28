@@ -26,7 +26,7 @@ function escapeNewLine(text: string): string {
 }
 
 function escapeGenerics(text: string): string {
-  return text.replace(/</g, " < ").replace(/>/g, " > ");
+  return text.replace(/<(?! )/g, " < ").replace(/(?<! )>/g, " > ");
 }
 
 function replaceUnicode(text: string): string {
@@ -54,8 +54,8 @@ export function preprocessText(text: string): string {
 export function restoreText(text: string): string {
   let temp_text: string = text;
 
-  temp_text = temp_text.replace(/&lt;/g, " < ");
-  temp_text = temp_text.replace(/&gt;/g, " > ");
+  temp_text = temp_text.replace(/&lt;/g, "<");
+  temp_text = temp_text.replace(/&gt;/g, ">");
   temp_text = temp_text.replace(/&quot;/g, '"');
   temp_text = temp_text.replace(/&#39;/g, "'");
   temp_text = temp_text.replace(/&amp;/g, '&');
