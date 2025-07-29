@@ -11,11 +11,11 @@ import {
 import { CopyTextEntry } from "../components/copyTextEntry";
 
 const onPaste = joinFunctions(
+  replaceUnicode,
+  escapeGenerics,
   trimLines,
   escapeDollar,
   escapeNewLine,
-  escapeGenerics,
-  replaceUnicode,
 );
 
 export function EchoText() {

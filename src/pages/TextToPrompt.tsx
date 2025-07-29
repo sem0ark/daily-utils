@@ -11,11 +11,11 @@ import {
 } from "../textProcessing";
 
 const onPaste = joinFunctions(
+  replaceUnicode,
+  escapeGenerics,
   trimLines,
   escapeDollar,
   escapeNewLine,
-  escapeGenerics,
-  replaceUnicode,
 );
 
 function populateTemplate(text: string, replacement: string = ""): string {
