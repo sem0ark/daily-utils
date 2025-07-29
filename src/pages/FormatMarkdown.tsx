@@ -18,10 +18,10 @@ function replaceMarkdownElements(text: string) {
 }
 
 const onPaste = joinFunctions(
+  replaceUnicode,
   trimLines,
   escapeDollar,
   escapeNewLine,
-  replaceUnicode,
 );
 
 const onCopy = (text: string) => replaceMarkdownElements(restoreText(text));

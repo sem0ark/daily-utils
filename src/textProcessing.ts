@@ -1,8 +1,5 @@
 export function trimLines(text: string): string {
-  const trimmedLines = text
-    .replace(/\s+$/, "")
-    .split("\n")
-    .map((line) => line.trimEnd());
+  const trimmedLines = text.split("\n").map((line) => line.trimEnd());
   const textWithTrimmedLines = trimmedLines.join("\n");
   const normalizedNewlines = textWithTrimmedLines.replace(/\n{3,}/g, "\n\n");
   return normalizedNewlines;
