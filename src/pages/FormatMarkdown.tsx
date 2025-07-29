@@ -1,6 +1,13 @@
 import { useCallback, useState } from "react";
-import { CopyTextEntry } from "../components/copyTextEntry";
-import { preprocessText, restoreText } from "../textProcessing";
+import { CopyTextEntryDirect } from "../components/copyTextEntry";
+import {
+  escapeDollar,
+  escapeNewLine,
+  joinFunctions,
+  replaceUnicode,
+  restoreText,
+  trimLines,
+} from "../textProcessing";
 
 function replaceMarkdownElements(text: string) {
   return text
@@ -9,6 +16,15 @@ function replaceMarkdownElements(text: string) {
     .replace(/( {4}|\t)/g, "   ")
     .replace(/(\s*)(\d*\.) {2,}/gm, "$1$2 ");
 }
+
+const onPaste = joinFunctions(
+  trimLines,
+  escapeDollar,
+  escapeNewLine,
+  replaceUnicode,
+);
+
+const onCopy = (text: string) => replaceMarkdownElements(restoreText(text));
 
 export function FormatMarkdown() {
   const [count, setCount] = useState(1);
@@ -26,11 +42,7 @@ export function FormatMarkdown() {
 
       <div className="my-5 flex flex-col gap-4">
         {Array.from(Array(count)).map((_, index) => (
-          <CopyTextEntry
-            key={index}
-            onPaste={preprocessText}
-            onCopy={(text) => replaceMarkdownElements(restoreText(text))}
-          />
+          <CopyTextEntryDirect key={index} onPaste={onPaste} onCopy={onCopy} />
         ))}
       </div>
 

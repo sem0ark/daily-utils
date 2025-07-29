@@ -1,6 +1,22 @@
 import { useCallback, useState } from "react";
-import { preprocessText, restoreText } from "../textProcessing";
+import {
+  escapeDollar,
+  escapeGenerics,
+  escapeNewLine,
+  joinFunctions,
+  replaceUnicode,
+  restoreText,
+  trimLines,
+} from "../textProcessing";
 import { CopyTextEntry } from "../components/copyTextEntry";
+
+const onPaste = joinFunctions(
+  trimLines,
+  escapeDollar,
+  escapeNewLine,
+  escapeGenerics,
+  replaceUnicode,
+);
 
 export function EchoText() {
   const [count, setCount] = useState(1);
@@ -12,11 +28,7 @@ export function EchoText() {
 
       <div className="my-5 flex flex-col gap-4">
         {Array.from(Array(count)).map((_, index) => (
-          <CopyTextEntry
-            key={index}
-            onPaste={(text) => preprocessText(text)}
-            onCopy={restoreText}
-          />
+          <CopyTextEntry key={index} onPaste={onPaste} onCopy={restoreText} />
         ))}
       </div>
 
