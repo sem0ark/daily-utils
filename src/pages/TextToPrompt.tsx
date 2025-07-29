@@ -1,6 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CopyTextEntry } from "../components/copyTextEntry";
-import { preprocessText, restoreText } from "../textProcessing";
+import { CopyTextEntryDirect } from "../components/copyTextEntry";
+import {
+  escapeDollar,
+  escapeGenerics,
+  escapeNewLine,
+  joinFunctions,
+  replaceUnicode,
+  restoreText,
+  trimLines,
+} from "../textProcessing";
+
+const onPaste = joinFunctions(
+  trimLines,
+  escapeDollar,
+  escapeNewLine,
+  escapeGenerics,
+  replaceUnicode,
+);
 
 function populateTemplate(text: string, replacement: string = ""): string {
   const emptyTripleQuotesRegex = /"""\n*"""/g;
@@ -9,9 +25,11 @@ function populateTemplate(text: string, replacement: string = ""): string {
 
 function divideMarkdown(markdownText: string): string[] {
   const sections: string[] = [];
-  const mainSections = markdownText.split(/(?=^#\s+(.*))/m).filter(t => t.startsWith("#"))
+  const mainSections = markdownText
+    .split(/(?=^#\s+(.*))/m)
+    .filter((t) => t.startsWith("#"));
 
-  for(const sectionText of mainSections) {
+  for (const sectionText of mainSections) {
     let currentSection: string[] = [];
     let wordCount = 0;
 
@@ -104,9 +122,9 @@ export function TextToPrompt() {
 
       <div className="my-5 flex flex-col gap-4">
         {Array.from(Array(count)).map((_, index) => (
-          <CopyTextEntry
+          <CopyTextEntryDirect
             key={index}
-            onPaste={preprocessText}
+            onPaste={onPaste}
             onCopy={(content: string) => {
               const text = restoreText(content ?? "");
               return divideMarkdown(text)
