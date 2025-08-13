@@ -11,7 +11,7 @@ import {
 
 function replaceMarkdownElements(text: string) {
   return text
-    .replace(/\n {2,}\* {1,}/g, "\n- ")
+    .replace(/\n {0,2}\* {1,}/g, "\n- ")
     .replace(/( {4}|\t)\* {1,}/g, "    - ")
     .replace(/( {4}|\t)/g, "   ")
     .replace(/(\s*)(\d*\.) {2,}/gm, "$1$2 ");
