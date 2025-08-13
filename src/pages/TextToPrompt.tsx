@@ -71,7 +71,26 @@ function divideMarkdown(markdownText: string): string[] {
     }
   }
 
-  return sections;
+  const mergedSections: string[] = [];
+  let tempSection = "";
+
+  for (const section of sections) {
+    if (
+      tempSection.length === 0 ||
+      tempSection.length + section.length <= 10000
+    ) {
+      tempSection += "\n\n" + section;
+    } else {
+      mergedSections.push(tempSection);
+      tempSection = section;
+    }
+  }
+
+  if (tempSection.length > 0) {
+    mergedSections.push(tempSection);
+  }
+
+  return mergedSections;
 }
 
 export function TextToPrompt() {
