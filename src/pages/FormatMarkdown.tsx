@@ -1,30 +1,20 @@
 import { useCallback, useState } from "react";
 import { CopyTextEntryDirect } from "../components/copyTextEntry";
-import {
-  escapeDollar,
-  escapeNewLine,
-  joinFunctions,
-  replaceUnicode,
-  restoreText,
-  trimLines,
-} from "../textProcessing";
+import { joinFunctions, replaceUnicode, trimLines } from "../textProcessing";
+
+const onPaste = joinFunctions(replaceUnicode, trimLines);
 
 function replaceMarkdownElements(text: string) {
   return text
-    .replace(/\n {0,2}\* {1,}/g, "\n- ")
+    .replace(/\n\* {1,}/g, "\n- ")
+    .replace(/\n {2}\* {1,}/g, "\n  - ")
     .replace(/( {4}|\t)\* {1,}/g, "    - ")
     .replace(/( {4}|\t)/g, "   ")
-    .replace(/(\s*)(\d*\.) {2,}/gm, "$1$2 ");
+    .replace(/(\s*)(\d*\.) {1,}/gm, "$1$2 ")
+    .replace(/^-{3,}$/gm, "\n\n");
 }
 
-const onPaste = joinFunctions(
-  replaceUnicode,
-  trimLines,
-  escapeDollar,
-  escapeNewLine,
-);
-
-const onCopy = (text: string) => replaceMarkdownElements(restoreText(text));
+const onCopy = (text: string) => replaceMarkdownElements(text);
 
 export function FormatMarkdown() {
   const [count, setCount] = useState(1);
