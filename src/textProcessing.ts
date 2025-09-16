@@ -16,7 +16,7 @@ export function escapeDollar(text: string): string {
   };
   return text
     .split("\n")
-    .map((line) => line.replace(/[^$](\$)([^$]+)\1/g, replacer))
+    .map((line) => line.replace(/(?:[^$])(\$)([^$]+)\1/g, replacer))
     .join("\n")
     .replace(/(\$\$)([^$]+)\1/g, replacer);
 }
