@@ -1,8 +1,18 @@
 export function trimLines(text: string): string {
-  const trimmedLines = text.split("\n").map((line) => line.trimEnd());
-  const textWithTrimmedLines = trimmedLines.join("\n");
-  const normalizedNewlines = textWithTrimmedLines.replace(/\n{3,}/g, "\n\n");
-  return normalizedNewlines;
+  // Trim, but ensure we have escaped leading whitespace.
+  return text.split("\n")
+    .map((line) => {
+      const leadingWhitespaceMatch = line.match(/^(\s*)/);
+      const leadingWhitespace = leadingWhitespaceMatch ? leadingWhitespaceMatch[1] : '';
+      const trimmedText = line.trimStart();
+
+      if(leadingWhitespace.length > 1 && trimmedText.length > 1) {
+        return `<pre>${leadingWhitespace}</pre>${trimmedText.trimEnd()}`;
+      }
+
+      return trimmedText.trim()
+    })
+    .join("\n");
 }
 
 export function escapeDollar(text: string): string {
@@ -56,6 +66,7 @@ export function restoreText(text: string): string {
   temp_text = temp_text.replace(/<br>/g, "\n");
   temp_text = temp_text.replace(/<\/pre>/g, "");
   temp_text = temp_text.replace(/<pre>/g, "");
+  temp_text = temp_text.split("\n").map((line) => line.trimEnd()).join("\n");
 
   return temp_text;
 }
