@@ -1,8 +1,13 @@
 import { useCallback, useState } from "react";
 import { CopyTextEntryDirect } from "../components/copyTextEntry";
-import { joinFunctions, replaceUnicode, trimLines } from "../textProcessing";
+import {
+  joinFunctions,
+  replaceUnicode,
+  removeEmoji,
+  trimLines,
+} from "../textProcessing";
 
-const onPaste = joinFunctions(replaceUnicode, trimLines);
+const onPaste = joinFunctions(replaceUnicode, removeEmoji, trimLines);
 
 function replaceMarkdownElements(text: string) {
   return text
@@ -11,7 +16,8 @@ function replaceMarkdownElements(text: string) {
     .replace(/( {4}|\t)\* {1,}/g, "    - ")
     .replace(/( {4}|\t)/g, "   ")
     .replace(/(\s*)(\d*\.) {1,}/gm, "$1$2 ")
-    .replace(/^-{3,}$/gm, "\n\n");
+    .replace(/^-{3,}$/gm, "")
+    .replace(/^\*{3,}$/gm, "");
 }
 
 const onCopy = (text: string) => replaceMarkdownElements(text);

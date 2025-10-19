@@ -1,17 +1,27 @@
-export function trimLines(text: string): string {
+export function escapeLeadingWhitespace(text: string): string {
   // Trim, but ensure we have escaped leading whitespace.
-  return text.split("\n")
+  return text
+    .split("\n")
     .map((line) => {
       const leadingWhitespaceMatch = line.match(/^(\s*)/);
-      const leadingWhitespace = leadingWhitespaceMatch ? leadingWhitespaceMatch[1] : '';
+      const leadingWhitespace = leadingWhitespaceMatch
+        ? leadingWhitespaceMatch[1]
+        : "";
       const trimmedText = line.trimStart();
 
-      if(leadingWhitespace.length > 1 && trimmedText.length > 1) {
+      if (leadingWhitespace.length > 1 && trimmedText.length > 1) {
         return `<pre>${leadingWhitespace}</pre>${trimmedText.trimEnd()}`;
       }
 
-      return trimmedText.trim()
+      return trimmedText.trim();
     })
+    .join("\n");
+}
+
+export function trimLines(text: string): string {
+  return text
+    .split("\n")
+    .map((line) => line.trimEnd())
     .join("\n");
 }
 
@@ -48,6 +58,13 @@ export function replaceUnicode(text: string): string {
     .replace(/[\u2022\u2023\u25E6\u2043\u2219]/g, "- ");
 }
 
+export function removeEmoji(text: string): string {
+  return text.replace(
+    /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
+    "",
+  );
+}
+
 export function joinFunctions(
   ...functions: ((text: string) => string)[]
 ): (text: string) => string {
@@ -66,7 +83,10 @@ export function restoreText(text: string): string {
   temp_text = temp_text.replace(/<br>/g, "\n");
   temp_text = temp_text.replace(/<\/pre>/g, "");
   temp_text = temp_text.replace(/<pre>/g, "");
-  temp_text = temp_text.split("\n").map((line) => line.trimEnd()).join("\n");
+  temp_text = temp_text
+    .split("\n")
+    .map((line) => line.trimEnd())
+    .join("\n");
 
   return temp_text;
 }

@@ -24,9 +24,34 @@ function populateTemplate(text: string, replacement: string = ""): string {
 }
 
 function divideMarkdown(markdownText: string): string[] {
-  const sections: string[] = [];
-  const mainSections = markdownText.split(/(?=^#\s+(.*))/m);
+  const lines = markdownText.split("\n");
+  const mainSections: string[] = [];
+  let currentMainSection = "";
+  let inCodeBlock = false;
 
+  for (const line of lines) {
+    const isCodeBlockDelimiter = line.trim().startsWith("```");
+    const isTopLevelHeader = line.startsWith("# ");
+
+    if (isCodeBlockDelimiter) {
+      inCodeBlock = !inCodeBlock;
+    }
+
+    if (isTopLevelHeader && !inCodeBlock) {
+      if (currentMainSection.length > 0) {
+        mainSections.push(currentMainSection.trim());
+      }
+      currentMainSection = line;
+    } else {
+      currentMainSection += "\n" + line;
+    }
+  }
+
+  if (currentMainSection.length > 0) {
+    mainSections.push(currentMainSection.trim());
+  }
+
+  const sections: string[] = [];
   for (const sectionText of mainSections) {
     let currentSection: string[] = [];
     let wordCount = 0;

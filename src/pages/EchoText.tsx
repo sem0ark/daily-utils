@@ -7,6 +7,7 @@ import {
   replaceUnicode,
   restoreText,
   trimLines,
+  escapeLeadingWhitespace,
 } from "../textProcessing";
 import { CopyTextEntry } from "../components/copyTextEntry";
 
@@ -14,6 +15,7 @@ const onPaste = joinFunctions(
   replaceUnicode,
   escapeGenerics,
   trimLines,
+  escapeLeadingWhitespace,
   escapeDollar,
   escapeNewLine,
 );
