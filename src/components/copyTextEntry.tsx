@@ -56,10 +56,11 @@ export const CopyTextEntry = ({
   }, [onPaste]);
 
   return (
-    <div className="relative min-h-32 rounded-xl border-2 border-neutral-500 p-2">
+    <div className="relative min-h-32 rounded-xl border-2 border-neutral-500 p-2 pb-3">
       <div className="flex w-full flex-col gap-2 px-2">
         <p className="font-bold text-blue-500">Enter your text here:</p>
         <textarea
+          autoFocus
           ref={textareaRef}
           name="entered text"
           className="w-full scroll-m-0 rounded-lg border-2 border-neutral-500 bg-neutral-100 p-4 ring-0 outline-none"
@@ -115,10 +116,11 @@ export const CopyTextEntryDirect = ({
   }, [onPaste]);
 
   return (
-    <div className="relative min-h-32 rounded-xl border-2 border-neutral-500 p-2">
+    <div className="relative min-h-32 rounded-xl border-2 border-neutral-500 p-2 pb-3">
       <div className="flex w-full flex-col gap-2 px-2">
         <p className="font-bold text-blue-500">Enter your text here:</p>
         <textarea
+          autoFocus
           ref={textareaRef}
           name="entered text"
           className="w-full scroll-m-0 rounded-lg border-2 border-neutral-500 bg-neutral-100 p-4 ring-0 outline-none"

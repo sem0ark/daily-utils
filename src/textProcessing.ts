@@ -51,18 +51,15 @@ export function escapeGenerics(text: string): string {
 
 export function replaceUnicode(text: string): string {
   return text
-    .replace(
-      /[\u007F-\u009F\u2000-\u200A\u2028-\u202F\u205F\u3000\uFEFF]/gu,
-      "",
-    )
-    .replace(/[\u2022\u2023\u25E6\u2043\u2219]/g, "- ");
+    .replace(/[\u2000-\u200A\u202F\u205F\u3000\uFEFF]/gu, " ")
+    .replace(/[\u2012-\u2015\u2212]/gu, "-")  
+    .replace(/[\u2022\u2023\u25E6\u2043\u2219]/gu, "- ")
+    .replace(/[\u007F-\u009F\u2028\u2029]/gu, "")
+    .trim();
 }
 
 export function removeEmoji(text: string): string {
-  return text.replace(
-    /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
-    "",
-  );
+  return text.replace(/\p{Emoji}/gu, "");
 }
 
 export function joinFunctions(
