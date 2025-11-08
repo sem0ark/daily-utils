@@ -59,7 +59,7 @@ export function replaceUnicode(text: string): string {
 }
 
 export function removeEmoji(text: string): string {
-  return text.replace(/\p{Emoji}/gu, "");
+  return text;
 }
 
 export function joinFunctions(
