@@ -116,75 +116,114 @@ function divideMarkdown(markdownText: string): string[] {
   return mergedSections;
 }
 
-export function TextToPrompt() {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [count, setCount] = useState(1);
-  const increase = useCallback(() => setCount((c) => c + 1), [setCount]);
+type Template = {name: string; contents: string; }
 
-  const [template, setTemplate] = useState<string | null>(null);
+const STORAGE_KEY = "text-to-prompt-templates";
+const DEFAULT_TEMPLATES: Template[] = [{ name: "Default", contents: '""""""' }];
+
+const loadTemplates = (): Template[] => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return DEFAULT_TEMPLATES;
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_TEMPLATES;
+  } catch (error) {
+    console.error("Failed to parse templates from localStorage", error);
+    return DEFAULT_TEMPLATES;
+  }
+};
+
+const PromptEditor = ({
+  template,
+  onUpdate,
+}: {
+  template: Template;
+  onUpdate: (newContents: string) => void;
+}) => {
+  // Use a local state for the textarea to keep typing lag-free
+  const [localText, setLocalText] = useState(template.contents);
+
+  // Sync local text when the parent switches the template index
   useEffect(() => {
-    if (template !== null) return;
-
-    const saved = localStorage.getItem("text-to-prompt-template") ?? "";
-    setTemplate(saved);
-
-    if (!textareaRef.current) return;
-    textareaRef.current.value = saved;
+    setLocalText(template.contents);
   }, [template]);
 
-  const updateTemplate = useCallback(() => {
-    if (!textareaRef.current) return "";
-    const text = textareaRef.current.value ?? "";
-    setTemplate(text);
-    localStorage.setItem("text-to-prompt-template", text);
-  }, []);
+  const handleSave = () => {
+    if (localText !== template.contents) {
+      onUpdate(localText);
+    }
+  };
 
   return (
-    <>
-      <h1 className="mb-8 w-full text-center text-3xl font-bold">
-        Text to promts
-      </h1>
-
-      <div className="w-full">
-        <p className="font-bold text-blue-500">
-          Enter custom template. <code>""""""</code> will be replaced with the
-          divided elements of text.
-        </p>
-        <textarea
-          ref={textareaRef}
-          name="entered text"
-          className="w-full scroll-m-0 rounded-lg border-2 border-neutral-500 bg-neutral-100 p-4 ring-0 outline-none"
-          onBlur={updateTemplate}
-        ></textarea>
-      </div>
-
-      <h2 className="my-8 w-full text-center text-2xl font-bold">
-        Text Entries
-      </h2>
-
-      <div className="my-5 flex flex-col gap-4">
-        {Array.from(Array(count)).map((_, index) => (
-          <CopyTextEntryDirect
-            key={index}
-            onPaste={onPaste}
-            onCopy={(content: string) => {
-              const text = restoreText(content ?? "");
-              return divideMarkdown(text)
-                .map((entry) => populateTemplate(template ?? '""""""', entry))
-                .join("\n".repeat(40));
-            }}
+    <div className="relative min-h-32 rounded-xl border-2 border-neutral-500 p-2 pb-3">
+      <div className="flex w-full flex-col gap-2 px-2">
+        <p className="text-blue-500 font-bold">Use <code>""""""</code> as a placeholder. It will be replaced with your divided text elements.</p>
+        <div className="w-full flex lg:flex-row lg:h-[400px]">
+          <textarea
+            value={localText}
+            onChange={(e) => setLocalText(e.target.value)}
+            onBlur={handleSave}
+            placeholder="Enter template contents..."
+            className="w-full h-full min-h-[200px] rounded-lg border-2 border-neutral-500 bg-neutral-100 p-4 outline-none focus:border-blue-500 transition-colors"
           />
-        ))}
+        </div>
       </div>
+    </div>
+  );
+};
 
-      <div className="flex gap-1 p-1">
-        <button
-          onClick={increase}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-neutral-500 bg-neutral-100 p-2 text-center text-xl font-bold text-blue-500 transition-all duration-400 hover:gap-4 hover:border-neutral-100 hover:text-blue-600"
-        >
-          New Entry
-        </button>
+const PromptFormattingForm = ({templateContents}: {templateContents: string}) => {
+  return (
+    <>
+      <h2 className="my-8 w-full text-center text-2xl font-bold">
+        Input Text
+      </h2>
+      <div className="my-5 flex flex-col gap-4">
+        <CopyTextEntryDirect
+          onPaste={onPaste}
+          onCopy={(content: string) => {
+            const text = restoreText(content ?? "");
+            return divideMarkdown(text)
+              .map((entry) => populateTemplate(templateContents, entry))
+              .join("\n".repeat(40));
+          }}
+        />
       </div>
     </>
+  )
+}
+
+export function TextToPrompt() {
+  const [templates, setTemplates] = useState<Template[]>(loadTemplates);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(templates));
+  }, [templates]);
+
+  const safeIndex = selectedIndex >= templates.length ? 0 : selectedIndex;
+  const currentTemplate = templates[safeIndex] ?? DEFAULT_TEMPLATES[0];
+
+  const updateCurrentTemplate = useCallback((newContents: string) => {
+    setTemplates((prev) => {
+      const next = [...prev];
+      if (next[safeIndex]) {
+        next[safeIndex] = { ...next[safeIndex], contents: newContents };
+      }
+      return next;
+    });
+  }, [safeIndex]);
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="mb-8 text-center text-3xl font-bold">Text to Prompts</h1>
+
+      <PromptEditor 
+        template={currentTemplate} 
+        onUpdate={updateCurrentTemplate} 
+      />
+      
+      <PromptFormattingForm templateContents={currentTemplate.contents} />
+    </div>
   );
 }
