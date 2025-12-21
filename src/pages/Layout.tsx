@@ -2,6 +2,8 @@ import { HomeIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { Link, Outlet } from "react-router";
 import { CommandMenu } from "./CommandMenu";
+import { useOfflineStatus } from "../hooks";
+import { WifiIcon } from "@heroicons/react/24/outline";
 
 const isMac = () => {
   if (typeof window === "undefined") return false;
@@ -12,6 +14,7 @@ const getModKey = () => (isMac() ? "⌘" : "Ctrl");
 
 export const Layout = () => {
   const [open, setOpen] = useState(false);
+  const isOnline = useOfflineStatus();
 
   return (
     <>
@@ -34,6 +37,15 @@ export const Layout = () => {
               <span> + K</span>
             </kbd>
           </button>
+
+          <div className="h-full p-2">
+            <WifiIcon
+              className={
+                isOnline ? "size-5 text-neutral-500" : "size-5 text-red-500"
+              }
+              title={isOnline ? "Currently online." : "No internet connection."}
+            />
+          </div>
         </nav>
       </div>
 
