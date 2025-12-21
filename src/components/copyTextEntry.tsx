@@ -123,7 +123,7 @@ export const CopyTextEntryDirect = ({
           autoFocus
           ref={textareaRef}
           name="entered text"
-          className="w-full scroll-m-0 rounded-lg border-2 border-neutral-500 bg-neutral-100 p-4 ring-0 outline-none"
+          className="w-full scroll-m-0 rounded-lg border-2 border-neutral-200 bg-neutral-100 p-4 ring-0 outline-none focus:border-neutral-500"
           onBlur={handleBlur}
         ></textarea>
 
