@@ -1,5 +1,4 @@
 import { immer } from "zustand/middleware/immer";
-import { devtools } from "zustand/middleware";
 import { v4 as uuid4 } from "uuid";
 
 import { createStoreContext, type SetState } from "../../common/store-utils";
@@ -152,20 +151,15 @@ export const createBoardStore = ({
 };
 
 const createBoardStorePersisted = ({ storeName }: { storeName: string }) =>
-  devtools(
-    persist(createBoardStore({ storeName, idGenerator: uuid4 }), {
-      name: `board-store-${storeName}`,
-      version: 1,
-      partialize: (state) => ({
-        lanes: state.lanes,
-        cards: state.cards,
-      }),
+  persist(createBoardStore({ storeName, idGenerator: uuid4 }), {
+    name: `board-store-${storeName}`,
+    version: 1,
+    partialize: (state) => ({
+      laneOrder: state.laneOrder, 
+      lanes: state.lanes,
+      cards: state.cards,
     }),
-    {
-      name: `board-store-${storeName}`,
-      trace: true,
-    },
-  );
+  });
 
 export const {
   useStore: useBoardStore,

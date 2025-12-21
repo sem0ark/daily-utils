@@ -60,7 +60,7 @@ export const CommandMenu = ({
       label="Global Command Menu"
       className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/50 pt-[20vh]"
     >
-      <div className="w-full max-w-[640px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl">
+      <div className="w-full max-w-[640px] overflow-hidden rounded-xl border border-slate-200 bg-white">
         <Command.Input
           placeholder="Search for tools or pages..."
           className="w-full border-b border-slate-200 p-4 text-lg outline-none"

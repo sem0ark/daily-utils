@@ -32,7 +32,7 @@ export const Layout = () => {
           >
             <MagnifyingGlassIcon className="size-4" />
             <span>Search tools...</span>
-            <kbd className="ml-4 rounded border border-slate-300 bg-white px-1.5 font-sans text-xs shadow-sm">
+            <kbd className="ml-4 rounded border border-slate-300 bg-white px-1.5 py-0.5 font-sans text-xs">
               <span>{getModKey()}</span>
               <span> + K</span>
             </kbd>
