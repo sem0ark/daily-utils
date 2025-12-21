@@ -1,10 +1,10 @@
 import React, { forwardRef } from "react";
 import {
-  XMarkIcon,
+  TrashIcon,
   EllipsisVerticalIcon,
   PlusIcon,
   PencilSquareIcon,
-} from "@heroicons/react/24/solid";
+} from "@heroicons/react/24/outline";
 import clsx from "clsx";
 
 export type ActionProps = {
@@ -15,41 +15,42 @@ export type ActionProps = {
 } & React.HTMLAttributes<HTMLButtonElement>;
 
 export const Action = forwardRef<HTMLButtonElement, ActionProps>(
-  (
-    { className, activeClassName, hoverClassName, grab, children, ...props },
-    ref,
-  ) => {
-    return (
-      <button
-        ref={ref}
-        {...props}
-        className={clsx(
-          "relative",
-          "btn btn-ghost btn-square btn-sm text-accent",
-          "gap-0",
-          grab && "cursor-grab",
+  ({ className, activeClassName, grab, children, ...props }, ref) => (
+    <button
+      ref={ref}
+      {...props}
+      className={clsx(
+        "relative flex items-center justify-center rounded p-1",
+        "transition-all duration-100 ease-in-out",
+        "border-neutral-500 bg-neutral-100 text-neutral-600",
 
-          "transition-colors duration-300 ease-in-out",
-          className,
+        grab ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
 
-          hoverClassName ?? "hover:bg-base-200",
-          activeClassName ?? "active:bg-base-200 active:text-base-content",
-          "focus-visible:ring-offset-base-100 focus-visible:shadow-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-0 focus-visible:outline-none",
-        )}
-        tabIndex={0}
-      >
-        {children}
-      </button>
-    );
-  },
+        "focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 focus-visible:outline-none",
+        activeClassName ?? "active:scale-95 active:bg-neutral-200",
+        className,
+      )}
+      tabIndex={0}
+    >
+      {children}
+    </button>
+  ),
 );
 
 export const Handle = forwardRef<HTMLButtonElement, ActionProps>(
   (props, ref) => {
     return (
-      <Action ref={ref} data-cypress="draggable-handle" grab={true} {...props}>
-        <EllipsisVerticalIcon className="absolute left-[2px] size-5" />
-        <EllipsisVerticalIcon className="absolute left-[10px] size-5" />
+      <Action
+        ref={ref}
+        data-cypress="draggable-handle"
+        grab={true}
+        className="border-none bg-transparent text-neutral-400"
+        {...props}
+      >
+        <div className="flex">
+          <EllipsisVerticalIcon className="-mr-3 size-4" />
+          <EllipsisVerticalIcon className="size-4" />
+        </div>
       </Action>
     );
   },
@@ -57,24 +58,38 @@ export const Handle = forwardRef<HTMLButtonElement, ActionProps>(
 
 export function Remove(props: ActionProps) {
   return (
-    <Action hoverClassName="hover:bg-red-100 hover:text-red-600" {...props}>
-      <XMarkIcon className="absolute top-1/2 left-1/2 size-5 -translate-x-1/2 -translate-y-1/2" />
+    <Action
+      // High contrast Red for destructive actions
+      hoverClassName="hover:border-red-500 hover:bg-white hover:text-red-500"
+      activeClassName="active:bg-red-50"
+      {...props}
+    >
+      <TrashIcon className="size-4" />
     </Action>
   );
 }
 
 export function AddNew(props: ActionProps) {
   return (
-    <Action hoverClassName="hover:bg-info/50 hover:text-info" {...props}>
-      <PlusIcon className="absolute top-1/2 left-1/2 size-5 -translate-x-1/2 -translate-y-1/2" />
+    <Action
+      // High contrast Blue for additions
+      hoverClassName="hover:border-blue-500 hover:bg-white hover:text-blue-500"
+      activeClassName="active:bg-blue-50"
+      {...props}
+    >
+      <PlusIcon className="size-4" />
     </Action>
   );
 }
 
 export function Edit(props: ActionProps) {
   return (
-    <Action hoverClassName="hover:bg-accent hover:text-white" {...props}>
-      <PencilSquareIcon className="absolute top-1/2 left-1/2 size-5 -translate-x-1/2 -translate-y-1/2" />
+    <Action
+      hoverClassName="hover:border-blue-500 hover:bg-white hover:text-blue-500"
+      activeClassName="active:bg-blue-50"
+      {...props}
+    >
+      <PencilSquareIcon className="size-4" />
     </Action>
   );
 }

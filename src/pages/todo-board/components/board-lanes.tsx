@@ -53,48 +53,54 @@ const Container = forwardRef<HTMLDivElement, ContainerProps>(
         {...props}
         ref={ref}
         className={clsx(
-          "rounded-box bg-base-200 border-base-content/10 m-2.5 box-border flex min-h-52 w-96 flex-col",
-          "appearance-none border outline-none",
-          "transition-colors duration-300 ease-in-out",
-          "focus-visible:ring-info focus-visible:ring-offset-base-100 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
-          "group/container",
-          {
-            "text-base-content/50 cursor-pointer items-center justify-center":
-              placeholder,
-            "border-base-content/20 hover:border-base-content/30 border-dashed bg-transparent":
-              placeholder,
+          "m-2.5 flex min-h-52 w-80 flex-col rounded-lg border-2 transition-all duration-200",
+          "box-border appearance-none outline-none",
 
-            // Hover state for the container (if it's not a placeholder and not unstyled)
-            "hover:bg-base-300": !placeholder && !onClick, // Add a subtle hover effect if it's a regular container and not a button
-            "bg-base-300": hover, // Add a subtle hover effect if it's a regular container and not a button
-          },
+          // Standard Lane: Neutral 50 bg with thick border
+          !placeholder && "border-neutral-500 bg-neutral-50",
+
+          // Placeholder (Add Lane): Dashed and subtle
+          placeholder && [
+            "cursor-pointer items-center justify-center border-dashed border-neutral-400 bg-transparent",
+            "text-neutral-500 hover:border-blue-500 hover:bg-white hover:text-blue-600",
+          ],
+
+          // Hover/Active State
+          !placeholder && !onClick && "hover:bg-neutral-100",
+          hover && "border-blue-500 bg-white ring-4 ring-blue-500",
+
+          "focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
         )}
         onClick={onClick}
         tabIndex={onClick ? 0 : undefined}
         style={style}
       >
+        {/* Header Section: Matches the "GO" button look from your example */}
         {!!label && (
           <div
             className={clsx(
-              "flex w-full flex-row items-center justify-between",
-              "bg-base-100 rounded-t-box",
-              "border-base-content/10 border-b",
+              "flex w-full flex-row items-center justify-between p-3",
+              "rounded-t-md border-b-2 border-neutral-500 bg-neutral-100",
             )}
           >
-            {label}
+            <div className="px-1 text-lg font-black tracking-tight text-blue-500 uppercase">
+              {label}
+            </div>
+
             <Handle
-              className="rounded-none rounded-tr-md border-0 py-8 pr-8"
+              className="rounded-lg p-1 text-neutral-400 hover:bg-neutral-200 hover:text-blue-500"
               {...handleProps}
             />
           </div>
         )}
 
+        {/* Content Section */}
         {placeholder ? (
-          <div className="flex flex-grow items-center justify-center p-4 text-center">
+          <div className="flex flex-grow items-center justify-center p-6 text-center text-xl font-bold tracking-widest uppercase">
             {children}
           </div>
         ) : (
-          <ul className="m-0 flex h-96 list-none flex-col gap-2 overflow-y-auto p-4">
+          <ul className="m-0 flex max-h-[70vh] list-none flex-col gap-2 overflow-y-auto p-3">
             {children}
           </ul>
         )}
@@ -102,6 +108,7 @@ const Container = forwardRef<HTMLDivElement, ContainerProps>(
     );
   },
 );
+Container.displayName = "Container";
 
 const animateLayoutChanges: AnimateLayoutChanges = (args) =>
   defaultAnimateLayoutChanges({ ...args, wasDragging: true });

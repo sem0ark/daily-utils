@@ -1,12 +1,11 @@
 import type { UniqueIdentifier } from "@dnd-kit/core";
 
-import { forwardRef, memo } from "react";
+import { forwardRef, memo, useMemo } from "react";
 import clsx from "clsx";
 import type { DraggableSyntheticListeners } from "@dnd-kit/core";
 import { CSS, type Transform } from "@dnd-kit/utilities";
 
 import { Handle, type ActionProps } from "./ActionButton";
-// import { useIsUsingHandleCard } from "../app-store";
 import { useSortable } from "@dnd-kit/sortable";
 import { CardContent, type CardContentProps } from "./CardContent";
 
@@ -45,59 +44,57 @@ const Item = memo(
       },
       ref,
     ) => {
-      const wrapperCustomProperties: React.CSSProperties = {
-        transition: transition,
-        transform: transform ? CSS.Transform.toString(transform) : undefined,
+      const styles: React.CSSProperties = {
+        transition,
+        transform: CSS.Transform.toString(transform ?? null),
         "--index": index,
       } as React.CSSProperties;
 
       return (
         <li
-          className={clsx(
-            "box-border flex transform-gpu touch-manipulation",
-            dragOverlay && "z-[999] scale-110",
-          )}
-          style={wrapperCustomProperties}
           ref={ref}
+          style={styles}
+          className={clsx(
+            "list-none py-1.5",
+            dragOverlay && "z-[1000] scale-[1.05]",
+          )}
           {...props}
         >
           <div
             className={clsx(
-              "relative flex flex-grow items-center pl-4",
-              "bg-base-100 rounded-md shadow-md outline-none",
-              "transform-origin-center box-border list-none",
-              "text-base-content text-base font-normal whitespace-nowrap",
-              "transition-shadow duration-200 ease-in-out",
-              "group/card",
+              "group/card relative flex items-stretch overflow-hidden rounded-lg border-2 transition-all duration-200",
 
-              !handle && "cursor-grab",
+              "border-neutral-500 bg-neutral-50 text-neutral-800",
 
-              dragging && !dragOverlay && "z-0 opacity-50",
-              dragging && !dragOverlay && "focus:shadow-md",
+              !dragOverlay && "hover:bg-white",
+              dragOverlay && "border-blue-500 bg-white ring-4 ring-blue-500/10",
 
-              disabled && "bg-base-200 cursor-not-allowed text-gray-500",
-              disabled && "focus:shadow-sm",
+              !handle && "cursor-grab active:cursor-grabbing",
+              dragging && !dragOverlay && "opacity-40 grayscale",
+              disabled && "cursor-not-allowed bg-neutral-200 opacity-50",
 
-              dragOverlay && "cursor-inherit animate-pop",
-
-              "focus-visible:shadow-accent focus-visible:shadow-md focus-visible:ring-2",
-              'before:bg-accent relative before:absolute before:top-1/2 before:left-0 before:block before:h-full before:w-1 before:-translate-y-1/2 before:rounded-l-[3px] before:content-[""]',
+              "focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20",
             )}
-            data-cypress="draggable-item"
             {...(!handle ? listeners : undefined)}
-            {...props}
             tabIndex={!handle ? 0 : undefined}
           >
-            {value}
-            <span className="ml-auto flex h-full flex-col justify-center">
-              {handle ? (
+            {/* The main content of the card */}
+            <div className="flex-grow p-2">{value}</div>
+
+            {handle && (
+              <div
+                className={clsx(
+                  "flex items-center border-l-2 border-neutral-500 bg-neutral-100 px-1 transition-colors",
+                  "group-hover/card:bg-neutral-200 group-hover/card:text-blue-600",
+                )}
+              >
                 <Handle
-                  className="rounded-none rounded-r-md py-8 pr-7"
                   {...handleProps}
                   {...listeners}
+                  className="h-full py-2 text-neutral-400 hover:text-blue-500"
                 />
-              ) : null}
-            </span>
+              </div>
+            )}
           </div>
         </li>
       );
@@ -128,26 +125,28 @@ export function SortableCard({
   index: number;
   disabled?: boolean;
 }) {
-  // const isUsingHandle = useIsUsingHandleCard();
   const {
     setNodeRef,
-    // setActivatorNodeRef,
-    // listeners,
+    setActivatorNodeRef,
+    listeners,
     isDragging,
     transform,
     transition,
   } = useSortable({ id });
 
+  const handleProps = useMemo(
+    () => ({ ref: setActivatorNodeRef, ...listeners }),
+    [setActivatorNodeRef, listeners],
+  );
+
   return (
     <CardItem
-      ref={disabled ? undefined : setNodeRef}
+      ref={setNodeRef}
       id={id}
-      dragging={isDragging}
-      // handle={isUsingHandle}
-      // handleProps={
-      //   isUsingHandle ? { ref: setActivatorNodeRef, ...listeners } : listeners
-      // }
       index={index}
+      dragging={isDragging}
+      handle={true}
+      handleProps={handleProps}
       transition={transition}
       transform={transform}
       disabled={disabled}
@@ -157,6 +156,5 @@ export function SortableCard({
 }
 
 export function OverlayCard({ id }: { id: UniqueIdentifier }) {
-  // const isUsingHandle = useIsUsingHandleCard();
-  return <CardItem dragging={true} id={id} />;
+  return <CardItem dragging={true} id={id} handle={true} dragOverlay />;
 }
