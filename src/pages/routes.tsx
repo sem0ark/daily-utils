@@ -4,7 +4,10 @@ import {
   CommandLineIcon,
   DocumentTextIcon,
   HomeIcon,
+  CheckBadgeIcon,
 } from "@heroicons/react/24/outline";
+
+import { Home } from "./Home";
 
 export interface NavItem {
   name: string;
@@ -15,7 +18,6 @@ export interface NavItem {
   showInHome: boolean;
 }
 
-const Home = lazy(() => import("./Home").then((m) => ({ default: m.Home })));
 const EchoText = lazy(() =>
   import("./text-processing/EchoText").then((m) => ({ default: m.EchoText })),
 );
@@ -27,6 +29,12 @@ const TextToPrompt = lazy(() =>
 const FormatMarkdown = lazy(() =>
   import("./text-processing/FormatMarkdown").then((m) => ({
     default: m.FormatMarkdown,
+  })),
+);
+
+const Kanban = lazy(() =>
+  import("./todo-board/TodoBoard").then((m) => ({
+    default: m.KanbanBoard,
   })),
 );
 
@@ -48,7 +56,7 @@ export const NAVIGATION_CONFIG: NavItem[] = [
     name: "Home",
     path: "/",
     icon: HomeIcon,
-    element: lazyLoad(Home),
+    element: <Home />,
     showInHome: false,
   },
   {
@@ -75,6 +83,14 @@ export const NAVIGATION_CONFIG: NavItem[] = [
       "Format markdown to standardize list bullets and italic markers.",
     icon: DocumentTextIcon,
     element: lazyLoad(FormatMarkdown),
+    showInHome: true,
+  },
+  {
+    name: "TODO Kanban Board",
+    path: "/todo",
+    description: "TODO Kanban board.",
+    icon: CheckBadgeIcon,
+    element: lazyLoad(Kanban),
     showInHome: true,
   },
 ];

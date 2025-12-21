@@ -1,5 +1,4 @@
 import { immer } from "zustand/middleware/immer";
-import { devtools } from "zustand/middleware";
 import { v4 as uuid4 } from "uuid";
 
 import { createStoreContext, type SetState } from "../../common/store-utils";
@@ -85,24 +84,34 @@ export const createBoardStore = ({
       cards: initialCards,
 
       actions: {
-        addLane: (lane: Omit<Lane, "id" | "cards">) =>
+        addLane: (lane: Omit<Lane, "id" | "cards">): Lane => {
+          const id = idGenerator();
+          const newLane = { ...lane, id, cards: [] };
+
           set((state) => {
-            const id = idGenerator();
-            state.lanes[id] = { ...lane, id, cards: [] };
+            state.lanes[id] = newLane;
             state.laneOrder.push(id);
-          }),
+          });
+
+          return newLane;
+        },
 
         updateLane: (id: ID, updates: Partial<Lane>) =>
           set((state) => {
             if (state.lanes[id]) Object.assign(state.lanes[id], updates);
           }),
 
-        addCard: (laneId: ID, card: Omit<Card, "id" | "laneId">) =>
+        addCard: (laneId: ID, card: Omit<Card, "id" | "laneId">): Card => {
+          const id = idGenerator();
+          const newCard = { ...card, id, laneId };
+
           set((state) => {
-            const id = idGenerator();
-            state.cards[id] = { ...card, id, laneId };
+            state.cards[id] = newCard;
             state.lanes[laneId]?.cards.push(id);
-          }),
+          });
+
+          return newCard;
+        },
 
         updateCard: (id: ID, updates: Partial<Card>) =>
           set((state) => {
@@ -142,20 +151,15 @@ export const createBoardStore = ({
 };
 
 const createBoardStorePersisted = ({ storeName }: { storeName: string }) =>
-  devtools(
-    persist(createBoardStore({ storeName, idGenerator: uuid4 }), {
-      name: `board-store-${storeName}`,
-      version: 1,
-      partialize: (state) => ({
-        lanes: state.lanes,
-        cards: state.cards,
-      }),
+  persist(createBoardStore({ storeName, idGenerator: uuid4 }), {
+    name: `board-store-${storeName}`,
+    version: 1,
+    partialize: (state) => ({
+      laneOrder: state.laneOrder, 
+      lanes: state.lanes,
+      cards: state.cards,
     }),
-    {
-      name: `board-store-${storeName}`,
-      trace: true,
-    },
-  );
+  });
 
 export const {
   useStore: useBoardStore,
@@ -164,7 +168,9 @@ export const {
   StoreProvider: BoardStoreProvider,
 } = createStoreContext(createBoardStorePersisted);
 
-// Optimized Lookups
+export const useBoardStoreActions = () =>
+  useBoardStore((state) => state.actions);
+
 export const useLane = (laneId: ID) =>
   useBoardStore((state) => state.lanes[laneId]);
 
@@ -173,7 +179,6 @@ export const useCard = (cardId: ID) =>
 
 export const useLaneOrder = () => useBoardStore((state) => state.laneOrder);
 
-// Logic derived from multiple parts of the state
 export const useIsCardDone = (cardId: ID) => {
   return useBoardStore((state) => {
     const card = state.cards[cardId];
