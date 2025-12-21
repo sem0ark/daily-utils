@@ -120,7 +120,90 @@ type Template = { name: string; contents: string };
 
 const STORAGE_KEY = "text-to-prompt-templates";
 const SELECTED_IDX_KEY = "text-to-prompt-templates-selection";
-const DEFAULT_TEMPLATES: Template[] = [{ name: "Default", contents: '""""""' }];
+const DEFAULT_TEMPLATES: Template[] = [
+  {
+    name: "ChatGPT",
+    contents: `
+Process and shrink the provided text, if needed apply corrections based on your knowledge of the topic. Make sure to keep all the terms, definitions and guidelines. Remove all miscellaneous information or water (such as historical information). Extract recommendations and additional information from the examples if applicable.
+
+""""""
+
+Process and shrink the provided text, if needed apply corrections based on your knowledge of the topic. Make sure to keep all the terms, definitions and guidelines. Remove all miscellaneous information or water (such as historical information). Extract recommendations and additional information from the examples if applicable.
+`.trim(),
+  },
+  {
+    name: "Gemini 2.5 Fast",
+    contents: `
+Please process and condense the following university lecture material for clarity and exam preparation. Your goal is to create a concise and well-structured summary containing all essential information. Specifically:
+
+- **Condense and Restructure:** Organize the content logically using headings, subheadings, bullet points, and numbered lists to create a clear and hierarchical structure still resembling the original order. Aim for maximum information retention with minimal text. Do not divide the information by type.
+
+- **Preserve Core Knowledge:** Ensure all terms, definitions, and guidelines are retained accurately and concisely. Do not remove or alter their meaning.
+
+- **Eliminate Redundancy and Extraneous Details:** Remove all unnecessary information, including side stories, anecdotes, excessive historical context (unless integral to a definition or guideline), and any other miscellaneous or redundant information that does not directly contribute to understanding the core concepts, terms, or guidelines.
+
+- **Provide code examples if applicable:** In case the text discusses specific framework functionality, include a small example of the programming code.
+
+**Input Text:**
+""""""
+
+**Output Requirements:**
+Provide a reorganized and significantly condensed version of the material. The output should feature a clear structure with headings and bullet points. All essential terms, definitions, and guidelines must be preserved. When presenting recommendations or actionable advice, rephrase them into concise sentences, using \`sentence\` form instead of \`keyword: sentence\` form. Highlight key terms within these sentences using *italics*. Compress to at least half the size of the input.
+`.trim(),
+  },
+  {
+    name: "Gemini 3 Fast",
+    contents: `
+Please process and condense the following university lecture material for clarity and exam preparation. Your goal is to create a concise and well-structured summary containing all essential information.
+
+Provide a reorganized and significantly condensed version of the material. The output should feature a clear structure with headings and bullet points. All essential terms, definitions, and guidelines must be preserved. When presenting recommendations or actionable advice, rephrase them into concise sentences, using \`sentence\` form instead of \`keyword: sentence\` form. Highlight key terms within these sentences using *italics*. Do not use emojis.
+
+Specifically:
+- **Condense and Restructure:** Organize the content logically using headings, subheadings, bullet points, and numbered lists to create a clear and hierarchical structure still resembling the original order. Aim for maximum information retention with minimal text. Do not divide the information by type.
+- **Preserve Core Knowledge:** Ensure all terms, definitions, and guidelines are retained accurately and concisely. Do not remove or alter their meaning.
+- **Eliminate Redundancy and Extraneous Details:** Remove all unnecessary information, including side stories, anecdotes, excessive historical context (unless integral to a definition or guideline), and any other miscellaneous or redundant information that does not directly contribute to understanding the core concepts, terms, or guidelines.
+- **Provide code examples if applicable:** In case the text discusses specific framework functionality, include a small example of the programming code.
+- **Do NOT repeat the content:** In case provided text looks like a continuation of a previous prompt, do not repeat content from the previous prompt.
+
+""""""
+`.trim(),
+  },
+  {
+    name: "Gemini AI Studio",
+    contents: `
+### Role
+You are a ruthless Technical Editor. Your goal is to distill lecture notes into the shortest possible form while retaining 100% of the technical definitions, strict logic, and code.
+
+### 1. Content Filtering (The "No Fluff" Policy)
+You must aggressively remove "water"—sentences that provide meta-commentary but no hard data.
+* **Remove Importance Signaling:** Delete sentences like "It is important to note," "Understanding X is crucial for Y," or "We will now discuss..."
+* **Remove Justifications:** Do not explain *why* a topic is interesting. Only explain *how* it works.
+
+### 2. List & Enumeration Logic (New!)
+When encountering lists (benefits, challenges, requirements):
+* **Merge Semantic Duplicates:** If two points convey the exact same meaning (e.g., "Scalability" and "Ability to grow"), combine them into one single bullet.
+* **Strip Introductions:** Remove phrases like "One of the advantages is..." or "Users will find that..." Start the sentence directly with the concept.
+* **Structure:** Keep distinct concepts as separate bullet points. Do not collapse lists into paragraphs.
+
+### 3. Compression & Formatting
+* **High Information Density:** Every bullet point must contain a definition, rule, or step.
+* **Sentence Style:** Use concise, active voice. Highlight key terms in *italics*.
+    * *Bad:* "One benefit is that it provides security."
+    * *Good:* *Security* is enforced through data encryption.
+
+### 4. Code Processing (Strict Rules)
+If the input contains code:
+* **Code is Truth:** Never replace code with text.
+* **Refactor & Comment:** Move strictly explanatory text from the notes *into* the code block as concise comments.
+
+### Input Processing
+Process the following material. If the text looks like a fragment, process it immediately without asking for context.
+
+Input:
+""""""
+`.trim(),
+  },
+];
 
 const loadSelectedIndex = (): number => {
   try {
