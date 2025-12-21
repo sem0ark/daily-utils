@@ -63,13 +63,13 @@ export const CopyTextEntry = ({
           autoFocus
           ref={textareaRef}
           name="entered text"
-          className="w-full scroll-m-0 rounded-lg border-2 border-neutral-500 bg-neutral-100 p-4 ring-0 outline-none"
+          className="w-full scroll-m-0 rounded-lg border-2 border-neutral-200 bg-neutral-100 p-4 ring-0 outline-none focus:border-neutral-500"
           onBlur={handleBlur}
         ></textarea>
 
         <button
           onClick={copyFromClipboard}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-neutral-500 bg-neutral-100 p-2 text-center text-xl font-bold text-blue-500 transition-all duration-400 hover:gap-4 hover:border-neutral-100 hover:text-blue-600"
+          className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-neutral-200 bg-neutral-100 p-2 text-center text-xl font-bold text-blue-500 transition-all duration-400 hover:gap-4 hover:border-neutral-500 hover:text-blue-600"
         >
           {isPasted ? "Pasted!" : "Paste from Clipboard"}
         </button>
@@ -119,22 +119,25 @@ export const CopyTextEntryDirect = ({
     <div className="relative min-h-32 rounded-xl border-2 border-neutral-500 p-2 pb-3">
       <div className="flex w-full flex-col gap-2 px-2">
         <p className="font-bold text-blue-500">Enter your text here:</p>
-        <textarea
-          autoFocus
-          ref={textareaRef}
-          name="entered text"
-          className="w-full scroll-m-0 rounded-lg border-2 border-neutral-200 bg-neutral-100 p-4 ring-0 outline-none focus:border-neutral-500"
-          onBlur={handleBlur}
-        ></textarea>
 
-        <div className="flex flex-row gap-1 bg-transparent">
-          <button
-            onClick={copyFromClipboard}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-neutral-500 bg-neutral-100 p-2 text-center text-xl font-bold text-blue-500 transition-all duration-400 hover:gap-4 hover:border-neutral-100 hover:text-blue-600"
-          >
-            {isPasted ? "Pasted!" : "Paste from Clipboard"}
-          </button>
-          <CopyToClipboard getText={getText} />
+        <div className="flex w-full flex-row gap-2">
+          <div className="flex w-full flex-col gap-2">
+            <textarea
+              autoFocus
+              ref={textareaRef}
+              name="entered text"
+              className="w-full scroll-m-0 rounded-lg border-2 border-neutral-200 bg-neutral-100 p-4 ring-0 outline-none focus:border-neutral-500"
+              onBlur={handleBlur}
+            ></textarea>
+            <button
+              onClick={copyFromClipboard}
+              className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-neutral-200 bg-neutral-100 p-2 text-center text-xl font-bold text-blue-500 transition-all duration-400 hover:gap-4 hover:border-neutral-500 hover:text-blue-600"
+            >
+              {isPasted ? "Pasted!" : "Paste from Clipboard"}
+            </button>
+          </div>
+
+          <CopyToClipboard getText={getText} className="p-12" />
         </div>
       </div>
     </div>
