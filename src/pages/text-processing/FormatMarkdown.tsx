@@ -5,7 +5,7 @@ import {
   replaceUnicode,
   removeEmoji,
   trimLines,
-} from "../../textProcessing";
+} from "./textProcessing";
 
 const onPaste = joinFunctions(replaceUnicode, removeEmoji, trimLines);
 

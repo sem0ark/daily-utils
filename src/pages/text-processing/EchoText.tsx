@@ -8,7 +8,7 @@ import {
   restoreText,
   trimLines,
   escapeLeadingWhitespace,
-} from "../../textProcessing";
+} from "./textProcessing";
 import { CopyTextEntry } from "../../components/copyTextEntry";
 
 const onPaste = joinFunctions(
