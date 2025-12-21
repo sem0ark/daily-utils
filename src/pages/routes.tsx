@@ -54,7 +54,8 @@ export const NAVIGATION_CONFIG: NavItem[] = [
   {
     name: "Echo Text",
     path: "/text-processing/echo",
-    description: "Bypass character text translation limits in Google Translate.",
+    description:
+      "Bypass character text translation limits in Google Translate.",
     icon: ChatBubbleLeftRightIcon,
     element: lazyLoad(EchoText),
     showInHome: true,
@@ -70,7 +71,8 @@ export const NAVIGATION_CONFIG: NavItem[] = [
   {
     name: "Format Markdown",
     path: "/text-processing/markdown",
-    description: "Format markdown to standardize list bullets and italic markers.",
+    description:
+      "Format markdown to standardize list bullets and italic markers.",
     icon: DocumentTextIcon,
     element: lazyLoad(FormatMarkdown),
     showInHome: true,
