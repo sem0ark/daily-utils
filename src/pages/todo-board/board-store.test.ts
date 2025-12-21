@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createBoardStore } from "./task-store";
+import { createBoardStore } from "./board-store";
 import { createStore } from "zustand";
 
 // Helper to create a generator that returns id-0, id-1, id-2...

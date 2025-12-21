@@ -2,7 +2,7 @@ import { HomeIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { Link, Outlet } from "react-router";
 import { CommandMenu } from "./CommandMenu";
-import { useOfflineStatus } from "../hooks";
+import { useOfflineStatus } from "../common/hooks";
 import { WifiIcon } from "@heroicons/react/24/outline";
 
 const isMac = () => {
@@ -17,7 +17,7 @@ export const Layout = () => {
   const isOnline = useOfflineStatus();
 
   return (
-    <>
+    <div className="m-0 min-h-dvh p-0">
       <div className="mx-auto mb-1 max-w-7xl">
         <nav className="flex flex-row gap-2 border-b-2 border-b-slate-300 py-2">
           <Link to="/">
@@ -54,6 +54,6 @@ export const Layout = () => {
       <main className="mx-auto max-w-7xl p-6">
         <Outlet />
       </main>
-    </>
+    </div>
   );
 };
