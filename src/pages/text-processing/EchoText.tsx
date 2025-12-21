@@ -8,7 +8,7 @@ import {
   trimLines,
   escapeLeadingWhitespace,
 } from "./textProcessing";
-import { CopyTextEntry } from "../../components/copyTextEntry";
+import { CopyTextEntry } from "../../common/components/copyTextEntry";
 
 const onPaste = joinFunctions(
   replaceUnicode,

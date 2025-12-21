@@ -1,4 +1,4 @@
-import { CopyTextEntryDirect } from "../../components/copyTextEntry";
+import { CopyTextEntryDirect } from "../../common/components/copyTextEntry";
 import {
   joinFunctions,
   replaceUnicode,

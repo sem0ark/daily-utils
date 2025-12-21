@@ -1,4 +1,4 @@
-import { Card } from "../components/Card";
+import { Card } from "../common/components/Card";
 import { NAVIGATION_CONFIG } from "./routes";
 
 export const Home = () => (
