@@ -155,7 +155,7 @@ const createBoardStorePersisted = ({ storeName }: { storeName: string }) =>
     name: `board-store-${storeName}`,
     version: 1,
     partialize: (state) => ({
-      laneOrder: state.laneOrder, 
+      laneOrder: state.laneOrder,
       lanes: state.lanes,
       cards: state.cards,
     }),

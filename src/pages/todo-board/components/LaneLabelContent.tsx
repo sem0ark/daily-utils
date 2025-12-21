@@ -19,18 +19,7 @@ export const LaneLabelContent = ({
   const { updateLane } = useBoardStoreActions();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [editedTitle, setEditedTitle] = useState(lane?.title || "");
-  const titleInputRef = useRef<HTMLInputElement>(null); // Ref for focusing the input
-
-  useEffect(() => {
-    if (lane && lane.title !== editedTitle) {
-      setEditedTitle(lane.title);
-      // If the title changed externally while editing, exit editing mode
-      if (isEditing) {
-        setIsEditing(false);
-      }
-    }
-  }, [lane?.title, editedTitle, isEditing, lane]);
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isEditing && titleInputRef.current) {
@@ -41,83 +30,81 @@ export const LaneLabelContent = ({
   const handleTitleClick = useCallback(() => {
     if (lane?.canEdit && !isEditing) {
       setIsEditing(true);
-      setEditedTitle(lane.title);
     }
-  }, [lane?.canEdit, lane?.title, isEditing]);
+  }, [lane?.canEdit, isEditing]);
 
   const handleTitleSubmit = useCallback(
     (e: React.FormEvent) => {
-      e.preventDefault(); // Prevent full form submission if input is inside a form
+      e.preventDefault();
       if (!lane) return;
 
       const trimmedTitle = titleInputRef.current?.value.trim() ?? "";
 
       if (trimmedTitle === "" || trimmedTitle === lane.title) {
-        setEditedTitle(lane.title);
         setIsEditing(false);
         return;
       }
 
-      // Update the lane title in the store
       updateLane(lane.id, { title: trimmedTitle });
-      setIsEditing(false); // Exit edit mode
+      setIsEditing(false);
     },
     [lane, updateLane],
-  );
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Escape") {
-        setEditedTitle(lane?.title || "");
-        setIsEditing(false);
-      }
-    },
-    [lane?.title],
   );
 
   if (!lane) return null;
 
   return (
-    <div className="flex w-full flex-row items-center gap-4 overflow-x-hidden px-4">
+    <div className="flex w-full min-w-0 flex-row gap-2 pr-1">
       {isEditing ? (
         <form
           onSubmit={handleTitleSubmit}
           onBlur={handleTitleSubmit}
-          className="w-full flex-grow"
+          className="flex-grow"
         >
           <input
             ref={titleInputRef}
             type="text"
-            className="input input-bordered input-md text-base-content w-full font-semibold"
+            className={clsx(
+              "w-full rounded border-2 border-blue-500 bg-white px-2 py-1",
+              "text-lg font-bold tracking-tight text-neutral-800 uppercase outline-none",
+            )}
             defaultValue={lane.title ?? ""}
-            onKeyDown={handleKeyDown}
-            placeholder="Lane title"
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setIsEditing(false);
+            }}
+            placeholder="LANE NAME"
             required
           />
         </form>
       ) : (
         <h3
           className={clsx(
-            "text-base-content flex-grow overflow-hidden text-lg font-semibold text-ellipsis", // flex-grow to occupy space
-            lane.canEdit && "cursor-pointer hover:underline",
+            "flex-grow truncate text-lg font-bold tracking-tight text-blue-500 uppercase transition-colors",
+            lane.canEdit && "cursor-pointer hover:text-blue-600",
           )}
           onClick={handleTitleClick}
         >
-          {lane.title || "Untitled Lane"}
+          {lane.title || "UNTITLED LANE"}
         </h3>
       )}
-      <div className="flex-1"></div>{" "}
-      {/* This flex-1 is now redundant if input takes flex-grow */}
-      {lane.canAddCard &&
-        !!onAddCard &&
-        !isEditing && ( // Hide while editing
-          <AddNew aria-label="Add Task" onClick={() => onAddCard(laneId)} />
+
+      <div className="flex-1"></div>
+
+      {/* Action Buttons: Only show when not editing and only if allowed */}
+      <div className="flex items-center gap-1">
+        {!isEditing && lane.canAddCard && onAddCard && (
+          <AddNew
+            className="border-2 border-neutral-300 hover:border-blue-500"
+            onClick={() => onAddCard(laneId)}
+          />
         )}
-      {lane.canRemove &&
-        !!onRemoveLane &&
-        !isEditing && ( // Hide while editing
-          <Remove onClick={onRemoveLane} />
+        {!isEditing && lane.canRemove && onRemoveLane && (
+          <Remove
+            className="border-2 border-neutral-300 hover:border-red-500"
+            onClick={onRemoveLane}
+          />
         )}
+      </div>
     </div>
   );
 };

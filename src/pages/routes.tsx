@@ -8,6 +8,8 @@ import {
 } from "@heroicons/react/24/outline";
 
 import { Home } from "./Home";
+import { EchoText } from "./text-processing/EchoText";
+import { FormatMarkdown } from "./text-processing/FormatMarkdown";
 
 export interface NavItem {
   name: string;
@@ -18,17 +20,9 @@ export interface NavItem {
   showInHome: boolean;
 }
 
-const EchoText = lazy(() =>
-  import("./text-processing/EchoText").then((m) => ({ default: m.EchoText })),
-);
 const TextToPrompt = lazy(() =>
   import("./text-processing/TextToPrompt").then((m) => ({
     default: m.TextToPrompt,
-  })),
-);
-const FormatMarkdown = lazy(() =>
-  import("./text-processing/FormatMarkdown").then((m) => ({
-    default: m.FormatMarkdown,
   })),
 );
 
@@ -65,7 +59,7 @@ export const NAVIGATION_CONFIG: NavItem[] = [
     description:
       "Bypass character text translation limits in Google Translate.",
     icon: ChatBubbleLeftRightIcon,
-    element: lazyLoad(EchoText),
+    element: <EchoText />,
     showInHome: true,
   },
   {
@@ -82,13 +76,12 @@ export const NAVIGATION_CONFIG: NavItem[] = [
     description:
       "Format markdown to standardize list bullets and italic markers.",
     icon: DocumentTextIcon,
-    element: lazyLoad(FormatMarkdown),
+    element: <FormatMarkdown />,
     showInHome: true,
   },
   {
     name: "TODO Kanban Board",
     path: "/todo",
-    description: "TODO Kanban board.",
     icon: CheckBadgeIcon,
     element: lazyLoad(Kanban),
     showInHome: true,
