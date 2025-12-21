@@ -5,20 +5,10 @@ import {
   replaceUnicode,
   removeEmoji,
   trimLines,
+  replaceMarkdownElements,
 } from "./textProcessing";
 
 const onPaste = joinFunctions(replaceUnicode, removeEmoji, trimLines);
-
-function replaceMarkdownElements(text: string) {
-  return text
-    .replace(/\n\* {1,}/g, "\n- ")
-    .replace(/\n {2}\* {1,}/g, "\n  - ")
-    .replace(/( {4}|\t)\* {1,}/g, "    - ")
-    .replace(/( {4}|\t)/g, "   ")
-    .replace(/(\s*)(\d*\.) {1,}/gm, "$1$2 ")
-    .replace(/^-{3,}$/gm, "")
-    .replace(/^\*{3,}$/gm, "");
-}
 
 const onCopy = (text: string) => replaceMarkdownElements(text);
 
