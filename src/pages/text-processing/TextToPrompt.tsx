@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CopyTextEntryDirect } from "../components/copyTextEntry";
+import { CopyTextEntryDirect } from "../../components/copyTextEntry";
 import {
   escapeDollar,
   escapeGenerics,
@@ -8,7 +8,7 @@ import {
   replaceUnicode,
   restoreText,
   trimLines,
-} from "../textProcessing";
+} from "../../textProcessing";
 
 const onPaste = joinFunctions(
   replaceUnicode,

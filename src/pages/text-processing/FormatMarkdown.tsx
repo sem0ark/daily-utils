@@ -1,11 +1,11 @@
 import { useCallback, useState } from "react";
-import { CopyTextEntryDirect } from "../components/copyTextEntry";
+import { CopyTextEntryDirect } from "../../components/copyTextEntry";
 import {
   joinFunctions,
   replaceUnicode,
   removeEmoji,
   trimLines,
-} from "../textProcessing";
+} from "../../textProcessing";
 
 const onPaste = joinFunctions(replaceUnicode, removeEmoji, trimLines);
 

@@ -52,7 +52,7 @@ export function escapeGenerics(text: string): string {
 export function replaceUnicode(text: string): string {
   return text
     .replace(/[\u2000-\u200A\u202F\u205F\u3000\uFEFF]/gu, " ")
-    .replace(/[\u2012-\u2015\u2212]/gu, "-")  
+    .replace(/[\u2012-\u2015\u2212]/gu, "-")
     .replace(/[\u2022\u2023\u25E6\u2043\u2219]/gu, "- ")
     .replace(/[\u007F-\u009F\u2028\u2029]/gu, "")
     .trim();
