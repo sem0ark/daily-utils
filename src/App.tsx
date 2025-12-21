@@ -1,38 +1,23 @@
-import { HashRouter, Route, Routes } from "react-router";
+import { createHashRouter, RouterProvider } from "react-router";
 
-import { EchoText } from "./pages/text-processing/EchoText";
-
-import { TextToPrompt } from "./pages/text-processing/TextToPrompt";
-import { FormatMarkdown } from "./pages/text-processing/FormatMarkdown";
+import { NAVIGATION_CONFIG } from "./pages/routes";
 import { Layout } from "./pages/Layout";
-import { Home } from "./pages/text-processing/Home";
-import { useKeyboardNavigation } from "./pages/navigation";
 
-const LayoutWithNavigation = () => {
-  useKeyboardNavigation([
-    "/text-processing/echo",
-    "/text-processing/prompts",
-    "/text-processing/markdown",
-  ]);
+const routes = [
+  {
+    element: <Layout />,
+    children: [
+      ...NAVIGATION_CONFIG.map((item) => ({
+        path: item.path,
+        element: item.element,
+      })),
+      { path: "/text-processing/home", element: NAVIGATION_CONFIG[0].element },
+    ],
+  },
+];
 
-  return <Layout />;
-};
+const router = createHashRouter(routes);
 
 export function App() {
-  return (
-    <HashRouter>
-      <Routes>
-        <Route element={<LayoutWithNavigation />}>
-          <Route index element={<Home />} />
-          <Route path="/text-processing/home" element={<Home />} />
-          <Route path="/text-processing/echo" element={<EchoText />} />
-          <Route path="/text-processing/prompts" element={<TextToPrompt />} />
-          <Route
-            path="/text-processing/markdown"
-            element={<FormatMarkdown />}
-          />
-        </Route>
-      </Routes>
-    </HashRouter>
-  );
+  return <RouterProvider router={router} />;
 }
