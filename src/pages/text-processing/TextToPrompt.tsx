@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { CopyTextEntryDirect } from "../../components/copyTextEntry";
+import { CopyTextEntryDirect } from "../../common/components/copyTextEntry";
 import {
   escapeDollar,
   escapeGenerics,

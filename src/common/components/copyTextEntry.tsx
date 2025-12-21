@@ -69,7 +69,7 @@ export const CopyTextEntry = ({
 
         <button
           onClick={copyFromClipboard}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-neutral-200 bg-neutral-100 p-2 text-center text-xl font-bold text-blue-500 transition-all duration-400 hover:gap-4 hover:border-neutral-500 hover:text-blue-600"
+          className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-neutral-200 bg-neutral-100 p-2 text-center text-xl font-bold text-blue-500 transition-all duration-200 hover:gap-4 hover:border-neutral-500 hover:text-blue-600"
         >
           {isPasted ? "Pasted!" : "Paste from Clipboard"}
         </button>
@@ -131,7 +131,7 @@ export const CopyTextEntryDirect = ({
             ></textarea>
             <button
               onClick={copyFromClipboard}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-neutral-200 bg-neutral-100 p-2 text-center text-xl font-bold text-blue-500 transition-all duration-400 hover:gap-4 hover:border-neutral-500 hover:text-blue-600"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-neutral-200 bg-neutral-100 p-2 text-center text-xl font-bold text-blue-500 transition-all duration-200 hover:gap-4 hover:border-neutral-500 hover:text-blue-600"
             >
               {isPasted ? "Pasted!" : "Paste from Clipboard"}
             </button>
