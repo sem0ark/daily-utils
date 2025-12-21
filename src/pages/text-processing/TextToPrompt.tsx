@@ -8,7 +8,7 @@ import {
   replaceUnicode,
   restoreText,
   trimLines,
-} from "../../textProcessing";
+} from "./textProcessing";
 
 const onPaste = joinFunctions(
   replaceUnicode,
