@@ -297,8 +297,6 @@ const PromptEditor = ({
                         onRemove(idx);
                     }}
                     className={`text-red-300 transition-all hover:text-red-500 ${
-                      templates.length <= 1 ? "hidden" : ""
-                    } ${
                       selectedIndex === idx
                         ? "w-auto scale-100 p-2 opacity-100"
                         : "w-0 scale-0 opacity-0"
@@ -409,8 +407,8 @@ export function TextToPrompt() {
 
   const removeTemplate = useCallback((index: number) => {
     setTemplates((prev) => {
-      if (prev.length <= 1) return prev; // Prevent deleting the last template
       const next = prev.filter((_, i) => i !== index);
+      if (next.length === 0) return DEFAULT_TEMPLATES;
       return next;
     });
 
