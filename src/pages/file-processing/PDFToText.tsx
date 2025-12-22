@@ -62,8 +62,6 @@ const processMessage = async (
               fontSize: Math.round(fontSize * 100) / 100,
               isBold,
               isItalic,
-              looksLikeHeading: fontSize > 14 && isBold,
-              fontName: fontName,
             },
           };
         });
@@ -107,6 +105,8 @@ const processMessage = async (
     } satisfies WorkerMessage);
   }
 };
+
+const FILE_TYPES = ["application/pdf"];
 
 export function PDFToText() {
   const [status, setStatus] = useState<
@@ -158,6 +158,7 @@ export function PDFToText() {
       <div className="flex flex-col gap-6">
         <FileUpload
           onFileUpload={handleFileUpload}
+          allowedFileTypes={FILE_TYPES}
           className={clsx(
             status === "processing" && "pointer-events-none opacity-50",
           )}

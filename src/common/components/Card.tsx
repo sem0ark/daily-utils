@@ -13,7 +13,7 @@ export const Card = ({
     title={"Go to " + name}
     className="group/card mx-auto flex w-full max-w-lg flex-col rounded-lg border-2 border-neutral-500 bg-neutral-50 p-4 hover:bg-white"
   >
-    <h2 className="text-xl font-bold text-blue-500">{name}</h2>
+    <h2 className="px-2 text-xl font-bold text-blue-500">{name}</h2>
 
     <div className="flex w-full flex-col p-2">{children}</div>
 

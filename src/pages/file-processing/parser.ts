@@ -11,8 +11,6 @@ export interface BoundingBox {
     fontSize: number;
     isBold: boolean;
     isItalic: boolean;
-    looksLikeHeading: boolean;
-    fontName: string;
   };
 }
 
@@ -172,7 +170,7 @@ export class MarkdownExtractor {
     let groupText = "";
 
     // Regex to detect: "1. ", "• ", "- ", "[1] ", "1) "
-    const listRegex = /^(\d+[.)]|[\u2022\-*\u25CB])\s+|^\s*\[\d+\]\s+/;
+    const listRegex = /^(\d+[.)]|[\u2022\-*\u25CB])\s+|^\s*\[\d+\]/;
 
     rows.forEach((rowItems, rowIndex) => {
       let rowText = "";
