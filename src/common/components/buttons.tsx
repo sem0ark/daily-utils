@@ -1,13 +1,24 @@
 import { useCallback, useState } from "react";
 import { DocumentDuplicateIcon, CheckIcon } from "@heroicons/react/24/solid";
-import { twMerge } from "tailwind-merge";
+import clsx from "clsx";
+
+const defaultClassName =
+  "w-fit cursor-pointer rounded-lg border-2 border-neutral-200 bg-neutral-100 p-1 font-bold text-blue-500 transition-all hover:gap-4 hover:border-neutral-500 hover:text-blue-600";
+const biggerClassName =
+  "w-fit cursor-pointer rounded-lg border-2 border-neutral-200 bg-neutral-100 p-12 font-bold text-blue-500 transition-all hover:gap-4 hover:border-neutral-500 hover:text-blue-600";
+const disabledClassName =
+  "w-fit cursor-pointer rounded-lg border-2 border-neutral-200 bg-neutral-100 p-1 font-bold text-neutral-500 transition-all hover:gap-4 hover:border-neutral-500 hover:text-neutral-600";
+const disabledBiggerClassName =
+  "w-fit cursor-pointer rounded-lg border-2 border-neutral-200 bg-neutral-100 p-12 font-bold text-neutral-500 transition-all hover:gap-4 hover:border-neutral-500 hover:text-neutral-600";
 
 export function CopyToClipboard({
   getText,
-  className,
+  bigger = false,
+  disabled = false,
 }: {
   getText: () => string;
-  className?: string;
+  bigger?: boolean;
+  disabled?: boolean;
 }) {
   const [isCopied, setIsCopied] = useState(false);
 
@@ -23,11 +34,13 @@ export function CopyToClipboard({
 
   return (
     <button
-      className={twMerge(
-        "w-fit cursor-pointer rounded-lg border-2 border-neutral-200 bg-neutral-100 p-1 font-bold text-blue-500 transition-all hover:gap-4 hover:border-neutral-500 hover:text-blue-600",
-        className,
+      className={clsx(
+        bigger && disabled && disabledBiggerClassName,
+        bigger && !disabled && biggerClassName,
+        !bigger && disabled && disabledClassName,
+        !bigger && !disabled && defaultClassName,
       )}
-      onClick={copy}
+      onClick={disabled ? undefined : copy}
     >
       {isCopied ? (
         <CheckIcon className="size-10" />

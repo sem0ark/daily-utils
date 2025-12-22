@@ -5,6 +5,7 @@ import {
   DocumentTextIcon,
   HomeIcon,
   CheckBadgeIcon,
+  CodeBracketIcon,
 } from "@heroicons/react/24/outline";
 
 import { Home } from "./Home";
@@ -29,6 +30,12 @@ const TextToPrompt = lazy(() =>
 const Kanban = lazy(() =>
   import("./todo-board/TodoBoard").then((m) => ({
     default: m.KanbanBoard,
+  })),
+);
+
+const PDFToText = lazy(() =>
+  import("./file-processing/PDFToText").then((m) => ({
+    default: m.PDFToText,
   })),
 );
 
@@ -75,15 +82,26 @@ export const NAVIGATION_CONFIG: NavItem[] = [
     path: "/text-processing/markdown",
     description:
       "Format markdown to standardize list bullets and italic markers.",
-    icon: DocumentTextIcon,
+    icon: CodeBracketIcon,
     element: <FormatMarkdown />,
     showInHome: true,
   },
   {
-    name: "TODO Kanban Board",
+    name: "Task Management Board",
     path: "/todo",
+    description:
+      "TODO Kanban system for tracking progress. Drag-and-drop tasks across custom lanes with persistent state storage.",
     icon: CheckBadgeIcon,
     element: lazyLoad(Kanban),
+    showInHome: true,
+  },
+  {
+    name: "PDF Structure Extractor",
+    path: "/pdf-to-markdown",
+    description:
+      "Extract text from PDF documents using worker-threaded processing. Preserves headings and basic formatting in Markdown output.",
+    icon: DocumentTextIcon,
+    element: lazyLoad(PDFToText),
     showInHome: true,
   },
 ];

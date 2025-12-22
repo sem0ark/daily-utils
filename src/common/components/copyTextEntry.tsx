@@ -137,7 +137,7 @@ export const CopyTextEntryDirect = ({
             </button>
           </div>
 
-          <CopyToClipboard getText={getText} className="p-12" />
+          <CopyToClipboard getText={getText} bigger />
         </div>
       </div>
     </div>
