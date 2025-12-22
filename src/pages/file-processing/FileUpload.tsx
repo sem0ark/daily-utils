@@ -15,7 +15,7 @@ const validateFile = (
 
 export const FileUpload = ({
   onFileUpload,
-  allowedFileTypes = ["application/pdf"],
+  allowedFileTypes = ["*"],
   className,
 }: {
   onFileUpload: (file: File[]) => void;

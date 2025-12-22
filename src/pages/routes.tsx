@@ -6,6 +6,7 @@ import {
   HomeIcon,
   CheckBadgeIcon,
   CodeBracketIcon,
+  PresentationChartBarIcon,
 } from "@heroicons/react/24/outline";
 
 import { Home } from "./Home";
@@ -39,6 +40,12 @@ const PDFToText = lazy(() =>
   })),
 );
 
+const PPTXToText = lazy(() =>
+  import("./file-processing/PPTXToText").then((m) => ({
+    default: m.PPTXToText,
+  })),
+);
+
 // Wrap lazy components in Suspense with a consistent loader
 const lazyLoad = (Component: React.LazyExoticComponent<() => ReactElement>) => (
   <Suspense
@@ -63,8 +70,7 @@ export const NAVIGATION_CONFIG: NavItem[] = [
   {
     name: "Echo Text",
     path: "/text-processing/echo",
-    description:
-      "Bypass character text translation limits in Google Translate.",
+    description: "Bypass character limits for Google Translate translation.",
     icon: ChatBubbleLeftRightIcon,
     element: <EchoText />,
     showInHome: true,
@@ -72,7 +78,7 @@ export const NAVIGATION_CONFIG: NavItem[] = [
   {
     name: "Text to Prompts",
     path: "/text-processing/prompts",
-    description: "Template-based prompt generation with clipboard support.",
+    description: "Generate AI prompts using templates and clipboard.",
     icon: CommandLineIcon,
     element: lazyLoad(TextToPrompt),
     showInHome: true,
@@ -80,28 +86,33 @@ export const NAVIGATION_CONFIG: NavItem[] = [
   {
     name: "Format Markdown",
     path: "/text-processing/markdown",
-    description:
-      "Format markdown to standardize list bullets and italic markers.",
+    description: "Clean and standardize Markdown list bullets and styles.",
     icon: CodeBracketIcon,
     element: <FormatMarkdown />,
     showInHome: true,
   },
   {
-    name: "Task Management Board",
+    name: "Task Board", // Shortened name for better search fit
     path: "/todo",
-    description:
-      "TODO Kanban system for tracking progress. Drag-and-drop tasks across custom lanes with persistent state storage.",
+    description: "Kanban board with drag-and-drop task management.",
     icon: CheckBadgeIcon,
     element: lazyLoad(Kanban),
     showInHome: true,
   },
   {
-    name: "PDF Structure Extractor",
+    name: "PDF Extractor",
     path: "/pdf-to-markdown",
-    description:
-      "Extract text from PDF documents using worker-threaded processing. Preserves headings and basic formatting in Markdown output.",
+    description: "Convert PDF documents to structured Markdown text.",
     icon: DocumentTextIcon,
     element: lazyLoad(PDFToText),
+    showInHome: true,
+  },
+  {
+    name: "PPTX Extractor",
+    path: "/PPTX-to-markdown",
+    description: "Convert PowerPoint slides to structured Markdown text.",
+    icon: PresentationChartBarIcon,
+    element: lazyLoad(PPTXToText),
     showInHome: true,
   },
 ];
