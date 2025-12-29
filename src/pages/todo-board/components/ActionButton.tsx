@@ -15,7 +15,10 @@ export type ActionProps = {
 } & React.HTMLAttributes<HTMLButtonElement>;
 
 export const Action = forwardRef<HTMLButtonElement, ActionProps>(
-  ({ className, activeClassName, grab, children, ...props }, ref) => (
+  (
+    { className, hoverClassName, activeClassName, grab, children, ...props },
+    ref,
+  ) => (
     <button
       ref={ref}
       {...props}
@@ -23,11 +26,12 @@ export const Action = forwardRef<HTMLButtonElement, ActionProps>(
         "relative flex items-center justify-center rounded p-1",
         "transition-all duration-100 ease-in-out",
         "border-neutral-500 bg-neutral-100 text-neutral-600",
+        "focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 focus-visible:outline-none",
 
         grab ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
 
-        "focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 focus-visible:outline-none",
         activeClassName ?? "active:scale-95 active:bg-neutral-200",
+        hoverClassName,
         className,
       )}
       tabIndex={0}
@@ -59,7 +63,6 @@ export const Handle = forwardRef<HTMLButtonElement, ActionProps>(
 export function Remove(props: ActionProps) {
   return (
     <Action
-      // High contrast Red for destructive actions
       hoverClassName="hover:border-red-500 hover:bg-white hover:text-red-500"
       activeClassName="active:bg-red-50"
       {...props}
@@ -72,7 +75,6 @@ export function Remove(props: ActionProps) {
 export function AddNew(props: ActionProps) {
   return (
     <Action
-      // High contrast Blue for additions
       hoverClassName="hover:border-blue-500 hover:bg-white hover:text-blue-500"
       activeClassName="active:bg-blue-50"
       {...props}

@@ -13,7 +13,7 @@ const onCopy = (text: string) => replaceMarkdownElements(text);
 
 export function FormatMarkdown() {
   return (
-    <div className="mx-auto max-w-4xl p-6">
+    <div className="mx-auto max-w-4xl">
       <h1 className="mb-8 text-center text-3xl font-bold">Format Markdown</h1>
 
       <div className="my-5 flex flex-col gap-4">

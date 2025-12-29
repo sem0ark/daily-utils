@@ -52,12 +52,11 @@ export const FileUpload = ({
       }}
       onClick={() => fileInputRef.current?.click()}
       className={clsx(
-        "group relative flex cursor-pointer flex-col items-center justify-center gap-4 p-12 transition-all",
-        "rounded-xl border-2 border-dashed",
+        "group relative flex cursor-pointer flex-col items-center justify-center gap-4 bg-neutral-100 p-12 transition-colors duration-200 ease-in-out",
+        "rounded-xl border-2",
 
-        !isDragging &&
-          "border-neutral-400 bg-neutral-50 hover:border-neutral-600 hover:bg-white",
-        isDragging && "border-blue-500 bg-blue-50 ring-4 ring-blue-500/10",
+        !isDragging && "border-neutral-200 hover:border-neutral-500",
+        isDragging && "border-blue-600 ring-4",
         className,
       )}
     >
@@ -70,13 +69,12 @@ export const FileUpload = ({
         multiple
       />
 
-      <div
-        className={clsx(
-          "flex flex-col items-center gap-2 transition-transform duration-200",
-          isDragging ? "scale-110" : "group-hover:scale-105",
-        )}
-      >
-        <div className="rounded-full border-2 border-neutral-500 bg-neutral-100 p-4 text-blue-500 group-hover:border-blue-500 group-hover:bg-white">
+      <div className={"flex flex-col items-center gap-2"}>
+        <div
+          className={
+            "rounded-full border-2 border-neutral-500 bg-neutral-100 p-4 text-neutral-500 transition-normal duration-200 ease-in-out group-hover:text-blue-600"
+          }
+        >
           <ArrowUpTrayIcon className="size-8 stroke-2" />
         </div>
       </div>

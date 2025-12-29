@@ -420,7 +420,7 @@ export function TextToPrompt() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-4xl p-6">
+    <div className="mx-auto max-w-4xl">
       <h1 className="mb-8 text-center text-3xl font-bold">Text to Prompts</h1>
 
       <PromptEditor

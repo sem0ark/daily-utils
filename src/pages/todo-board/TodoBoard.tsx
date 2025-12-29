@@ -12,7 +12,7 @@ function BoardWithProvider() {
 
 export function KanbanBoard() {
   return (
-    <div className="mx-auto h-full overflow-auto">
+    <div className="mx-auto h-full overflow-auto py-10">
       <BoardWithProvider />
     </div>
   );
