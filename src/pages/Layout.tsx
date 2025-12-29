@@ -19,7 +19,7 @@ export const Layout = () => {
   return (
     <div className="m-0 min-h-dvh p-0">
       <div className="mx-auto mb-1 max-w-7xl">
-        <nav className="flex flex-row gap-2 border-b-2 border-b-slate-300 py-2">
+        <nav className="flex flex-row gap-2 border-b-2 border-b-neutral-300 py-2">
           <Link to="/">
             <HomeIcon className="size-8 h-full transition-colors duration-200 hover:text-blue-500" />
           </Link>
@@ -28,13 +28,13 @@ export const Layout = () => {
 
           <button
             onClick={() => setOpen(true)}
-            className="flex items-center gap-2 rounded-md border border-slate-300 bg-slate-50 px-3 py-1.5 text-sm text-slate-500 transition-all hover:border-slate-400"
+            className="flex items-center gap-2 rounded-md border border-neutral-300 bg-neutral-50 px-3 py-1.5 text-sm text-neutral-500 transition-all hover:border-neutral-400"
           >
             <MagnifyingGlassIcon className="size-4" />
             <span>Search tools...</span>
-            <kbd className="ml-4 rounded border border-slate-300 bg-white px-1.5 py-0.5 font-sans text-xs">
+            <kbd className="ml-4 rounded border border-neutral-300 bg-white px-1.5 py-0.5 font-sans text-xs">
               <span>{getModKey()}</span>
-              <span> + K</span>
+              <span> + K/E</span>
             </kbd>
           </button>
 
