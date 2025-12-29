@@ -152,8 +152,8 @@ export function PDFToText() {
   const copyToClipboard = () => result;
 
   return (
-    <div className="mx-auto max-w-4xl p-8">
-      <h1 className="mb-8 text-center text-4xl text-blue-500">PDF Extractor</h1>
+    <div className="mx-auto max-w-4xl">
+      <h1 className="mb-8 text-center text-3xl font-bold">PDF to Markdown</h1>
 
       <div className="flex flex-col gap-6">
         <FileUpload
@@ -166,7 +166,7 @@ export function PDFToText() {
 
         {status === "processing" && (
           <div className="rounded-lg border-2 border-neutral-500 bg-neutral-100 p-6">
-            <div className="mb-4 flex items-center justify-between text-sm font-bold tracking-widest text-neutral-800 uppercase">
+            <div className="mb-4 flex items-center justify-between text-sm font-bold">
               <span>Processing Document...</span>
               <span className="text-blue-500">
                 {progress.done} / {progress.total} Pages
@@ -184,9 +184,7 @@ export function PDFToText() {
         {status === "done" && (
           <div className="group animate-in fade-in slide-in-from-bottom-4 relative">
             <div className="flex items-center justify-between rounded-t-lg border-2 border-b-0 border-neutral-500 bg-neutral-100 px-4 py-2">
-              <span className="text-xs font-bold tracking-widest text-neutral-600 uppercase">
-                Markdown Output
-              </span>
+              <span className="text-xs font-bold">Markdown Output</span>
               <CopyToClipboard
                 getText={copyToClipboard}
                 disabled={status !== "done"}
@@ -202,7 +200,7 @@ export function PDFToText() {
         )}
 
         {status === "error" && (
-          <div className="rounded-lg border-2 border-red-500 bg-red-50 p-4 font-bold tracking-tight text-red-600 uppercase">
+          <div className="rounded-lg border-2 border-red-500 bg-red-50 p-4 font-bold text-red-600">
             Extraction failed. Please ensure the PDF is not encrypted.
           </div>
         )}

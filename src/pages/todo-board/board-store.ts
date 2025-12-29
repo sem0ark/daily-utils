@@ -153,7 +153,7 @@ export const createBoardStore = ({
 const createBoardStorePersisted = ({ storeName }: { storeName: string }) =>
   persist(createBoardStore({ storeName, idGenerator: uuid4 }), {
     name: `board-store-${storeName}`,
-    version: 1,
+    version: 2,
     partialize: (state) => ({
       laneOrder: state.laneOrder,
       lanes: state.lanes,

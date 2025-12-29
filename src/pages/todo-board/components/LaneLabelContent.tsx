@@ -56,49 +56,43 @@ export const LaneLabelContent = ({
   return (
     <div className="flex w-full min-w-0 flex-row gap-2 pr-1">
       {isEditing ? (
-        <form
-          onSubmit={handleTitleSubmit}
-          onBlur={handleTitleSubmit}
-          className="flex-grow"
-        >
+        <form onSubmit={handleTitleSubmit} onBlur={handleTitleSubmit}>
           <input
             ref={titleInputRef}
             type="text"
-            className={clsx(
-              "w-full rounded border-2 border-blue-500 bg-white px-2 py-1",
-              "text-lg font-bold tracking-tight text-neutral-800 uppercase outline-none",
-            )}
+            className={
+              "w-full rounded border-neutral-500 bg-white px-2 text-lg font-bold tracking-tight outline-none"
+            }
             defaultValue={lane.title ?? ""}
             onKeyDown={(e) => {
               if (e.key === "Escape") setIsEditing(false);
             }}
-            placeholder="LANE NAME"
+            placeholder="Default name"
             required
           />
         </form>
       ) : (
         <h3
           className={clsx(
-            "flex-grow truncate text-lg font-bold tracking-tight text-blue-500 uppercase transition-colors",
+            "truncate text-lg font-bold transition-colors",
             lane.canEdit && "cursor-pointer hover:text-blue-600",
           )}
           onClick={handleTitleClick}
         >
-          {lane.title || "UNTITLED LANE"}
+          {lane.title || "Click to edit"}
         </h3>
       )}
 
       <div className="flex-1"></div>
 
-      {/* Action Buttons: Only show when not editing and only if allowed */}
-      <div className="flex items-center gap-1">
-        {!isEditing && lane.canAddCard && onAddCard && (
+      <div className="flex flex-row items-center gap-1">
+        {lane.canAddCard && onAddCard && (
           <AddNew
             className="border-2 border-neutral-300 hover:border-blue-500"
             onClick={() => onAddCard(laneId)}
           />
         )}
-        {!isEditing && lane.canRemove && onRemoveLane && (
+        {lane.canRemove && onRemoveLane && (
           <Remove
             className="border-2 border-neutral-300 hover:border-red-500"
             onClick={onRemoveLane}

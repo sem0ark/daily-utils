@@ -13,15 +13,6 @@ import { Home } from "./Home";
 import { EchoText } from "./text-processing/EchoText";
 import { FormatMarkdown } from "./text-processing/FormatMarkdown";
 
-export interface NavItem {
-  name: string;
-  path: string;
-  description?: string;
-  icon: React.ElementType;
-  element: React.ReactNode;
-  showInHome: boolean;
-}
-
 const TextToPrompt = lazy(() =>
   import("./text-processing/TextToPrompt").then((m) => ({
     default: m.TextToPrompt,
@@ -59,60 +50,86 @@ const lazyLoad = (Component: React.LazyExoticComponent<() => ReactElement>) => (
   </Suspense>
 );
 
+export interface NavItem {
+  name: string;
+  path: string;
+  description?: string;
+  tags: string[]; // Added for invisible search
+  icon: React.ElementType;
+  element: React.ReactNode;
+  showInHome: boolean;
+  showInCommandMenu: boolean;
+}
+
 export const NAVIGATION_CONFIG: NavItem[] = [
   {
     name: "Home",
+    description: "Application home.",
+    tags: ["home"],
     path: "/",
     icon: HomeIcon,
     element: <Home />,
     showInHome: false,
+    showInCommandMenu: false,
   },
   {
     name: "Echo Text",
     path: "/text-processing/echo",
-    description: "Bypass character limits for Google Translate translation.",
+    description: "Avoid Google Translate pagination clipping.",
+    tags: ["translate", "bypass", "split", "repeat", "google"],
     icon: ChatBubbleLeftRightIcon,
     element: <EchoText />,
     showInHome: true,
+    showInCommandMenu: true,
   },
   {
     name: "Text to Prompts",
     path: "/text-processing/prompts",
-    description: "Generate AI prompts using templates and clipboard.",
+    description: "Template-based AI prompt generator.",
+    tags: ["llm", "gpt", "template", "ai", "bulk", "clipboard"],
     icon: CommandLineIcon,
     element: lazyLoad(TextToPrompt),
     showInHome: true,
+    showInCommandMenu: true,
   },
   {
     name: "Format Markdown",
     path: "/text-processing/markdown",
-    description: "Clean and standardize Markdown list bullets and styles.",
+    description: "Standardize list styles and markers.",
+    tags: ["clean", "lint", "prettier", "bullets", "formatting"],
     icon: CodeBracketIcon,
     element: <FormatMarkdown />,
     showInHome: true,
+    showInCommandMenu: true,
   },
   {
-    name: "Task Board", // Shortened name for better search fit
+    name: "Task Board",
     path: "/todo",
-    description: "Kanban board with drag-and-drop task management.",
+    description: "Kanban task management.",
+    tags: ["todo", "management", "organize", "tasks", "drag", "drop"],
     icon: CheckBadgeIcon,
     element: lazyLoad(Kanban),
     showInHome: true,
+    showInCommandMenu: true,
   },
   {
     name: "PDF Extractor",
     path: "/pdf-to-markdown",
-    description: "Convert PDF documents to structured Markdown text.",
+    description: "PDF to structured Markdown.",
+    tags: ["file", "convert", "parse", "extraction", "document"],
     icon: DocumentTextIcon,
     element: lazyLoad(PDFToText),
     showInHome: true,
+    showInCommandMenu: true,
   },
   {
     name: "PPTX Extractor",
     path: "/PPTX-to-markdown",
-    description: "Convert PowerPoint slides to structured Markdown text.",
+    description: "PowerPoint to Markdown text.",
+    tags: ["slides", "presentation", "slideshow", "parse", "convert"],
     icon: PresentationChartBarIcon,
     element: lazyLoad(PPTXToText),
     showInHome: true,
+    showInCommandMenu: true,
   },
 ];

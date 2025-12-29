@@ -56,18 +56,15 @@ const Container = forwardRef<HTMLDivElement, ContainerProps>(
           "m-2.5 flex min-h-52 w-80 flex-col rounded-lg border-2 transition-all duration-200",
           "box-border appearance-none outline-none",
 
-          // Standard Lane: Neutral 50 bg with thick border
           !placeholder && "border-neutral-500 bg-neutral-50",
 
-          // Placeholder (Add Lane): Dashed and subtle
           placeholder && [
-            "cursor-pointer items-center justify-center border-dashed border-neutral-400 bg-transparent",
-            "text-neutral-500 hover:border-blue-500 hover:bg-white hover:text-blue-600",
+            "cursor-pointer items-center justify-center border-dashed border-neutral-200 bg-transparent",
+            "text-neutral-200 hover:border-neutral-500 hover:bg-white hover:text-neutral-600",
           ],
 
-          // Hover/Active State
           !placeholder && !onClick && "hover:bg-neutral-100",
-          hover && "border-blue-500 bg-white ring-4 ring-blue-500",
+          hover && "border-blue-500 bg-white",
 
           "focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
         )}
@@ -75,15 +72,9 @@ const Container = forwardRef<HTMLDivElement, ContainerProps>(
         tabIndex={onClick ? 0 : undefined}
         style={style}
       >
-        {/* Header Section: Matches the "GO" button look from your example */}
         {!!label && (
-          <div
-            className={clsx(
-              "flex w-full flex-row items-center justify-between p-3",
-              "rounded-t-md border-b-2 border-neutral-500 bg-neutral-100",
-            )}
-          >
-            <div className="px-1 text-lg font-black tracking-tight text-blue-500 uppercase">
+          <div className="flex w-full flex-row items-center justify-between rounded-t-md border-b-2 border-neutral-500 bg-neutral-100 p-3">
+            <div className="flex-1 px-1 text-lg font-black text-blue-500">
               {label}
             </div>
 
@@ -96,7 +87,7 @@ const Container = forwardRef<HTMLDivElement, ContainerProps>(
 
         {/* Content Section */}
         {placeholder ? (
-          <div className="flex flex-grow items-center justify-center p-6 text-center text-xl font-bold tracking-widest uppercase">
+          <div className="flex flex-grow items-center justify-center p-6 text-center text-xl font-bold">
             {children}
           </div>
         ) : (

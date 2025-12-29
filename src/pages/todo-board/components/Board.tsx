@@ -337,7 +337,7 @@ export function Board() {
       }}
       onDragCancel={onDragCancel}
     >
-      <div className="box-border inline-grid grid-flow-col p-5">
+      <div className="box-border inline-grid grid-flow-col py-5">
         <SortableContext
           items={[...containers, PLACEHOLDER_ID]}
           strategy={horizontalListSortingStrategy}
@@ -357,7 +357,7 @@ export function Board() {
             disabled={isDraggingContainer}
             onClick={handleAddColumn}
           >
-            <span className="text-base-content/70 hover:text-primary group-hover/container:text-accent text-xl font-bold transition-colors">
+            <span className="text-xl font-bold transition-colors">
               + Add column
             </span>
           </ColumnPlaceholder>
