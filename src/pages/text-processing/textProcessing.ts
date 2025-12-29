@@ -120,12 +120,13 @@ export function replaceMarkdownElements(text: string): string {
       // - Start of line or newline
       .replace(/(^|\n)\* +/g, "$1- ")
       // - 2 spaces
-      .replace(/\n {2}\* +/g, "\n  - ")
-      // - 4 spaces or tab
-      .replace(/( {4}|\t)\* +/g, "    - ")
+      .replace(/\n {2}\* +/g, "\n- ")
+      .replace(/\n {2}(\d+\.) +/g, "\n$1 ")
+      // - 3 spaces or tab
+      .replace(/( {4}|\t)\* +/g, "   - ")
 
       // Normalize remaining tabs/4-space blocks to exactly 4 spaces
-      .replace(/( {4}|\t)/g, "    ")
+      .replace(/( {4}|\t)/g, "   ")
 
       // Normalize numbered lists (ensure exactly one space after the dot)
       // Matches "1.   item" -> "1. item"
