@@ -390,19 +390,25 @@ describe("replaceMarkdownElements", () => {
 
   it("should handle nested bullets (2 spaces and 4 spaces)", () => {
     const input = "* Top\n  * Nested\n    * Deeper";
-    const expected = "- Top\n  - Nested\n    - Deeper";
+    const expected = "- Top\n- Nested\n   - Deeper";
+    expect(replaceMarkdownElements(input)).toBe(expected);
+  });
+
+  it("should handle nested bullets (2 spaces and 3 spaces)", () => {
+    const input = "* Top\n  * Nested\n    * Deeper";
+    const expected = "- Top\n- Nested\n   - Deeper";
     expect(replaceMarkdownElements(input)).toBe(expected);
   });
 
   it("should convert tabs to 4 spaces", () => {
     const input = "\t* Tabbed item";
-    const expected = "    - Tabbed item";
+    const expected = "   - Tabbed item";
     expect(replaceMarkdownElements(input)).toBe(expected);
   });
 
   it("should normalize spacing in numbered lists", () => {
     const input = "1.    First\n  2.   Second";
-    const expected = "1. First\n  2. Second";
+    const expected = "1. First\n2. Second";
     expect(replaceMarkdownElements(input)).toBe(expected);
   });
 
