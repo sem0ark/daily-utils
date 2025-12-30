@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DocumentDuplicateIcon, CheckIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 
@@ -15,10 +15,12 @@ export function CopyToClipboard({
   getText,
   bigger = false,
   disabled = false,
+  enableHotkeys = false,
 }: {
   getText: () => string;
   bigger?: boolean;
   disabled?: boolean;
+  enableHotkeys?: boolean;
 }) {
   const [isCopied, setIsCopied] = useState(false);
 
@@ -31,6 +33,26 @@ export function CopyToClipboard({
       console.error("Failed to copy text: ", err);
     }
   }, [getText, setIsCopied]);
+
+  useEffect(() => {
+    if (disabled || !enableHotkeys) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isCmdC = (e.ctrlKey || e.metaKey) && e.key === "c";
+
+      if (isCmdC) {
+        // Only intercept if no text is manually selected.
+        const hasSelection = window.getSelection()?.toString().length ?? 0 > 0;
+        if (!hasSelection) {
+          e.preventDefault();
+          copy();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [copy, disabled, enableHotkeys]);
 
   return (
     <button

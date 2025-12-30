@@ -26,9 +26,11 @@ const usePasteFromClipboard = () => {
 export const CopyTextEntry = ({
   onCopy,
   onPaste,
+  enableHotkeys = true,
 }: {
   onCopy: (text: string) => string;
   onPaste: (text: string) => string;
+  enableHotkeys?: boolean;
 }) => {
   const {
     onClick: copyFromClipboard,
@@ -75,7 +77,7 @@ export const CopyTextEntry = ({
         </button>
 
         <div className="absolute right-2 bottom-2 flex flex-col items-end gap-1 bg-transparent">
-          <CopyToClipboard getText={getText} />
+          <CopyToClipboard enableHotkeys={enableHotkeys} getText={getText} />
         </div>
       </div>
 
@@ -90,9 +92,11 @@ export const CopyTextEntry = ({
 export const CopyTextEntryDirect = ({
   onCopy,
   onPaste,
+  enableHotkeys = true,
 }: {
   onCopy: (text: string) => string;
   onPaste: (text: string) => string;
+  enableHotkeys?: boolean;
 }) => {
   const {
     onClick: copyFromClipboard,
@@ -137,7 +141,11 @@ export const CopyTextEntryDirect = ({
             </button>
           </div>
 
-          <CopyToClipboard getText={getText} bigger />
+          <CopyToClipboard
+            enableHotkeys={enableHotkeys}
+            getText={getText}
+            bigger
+          />
         </div>
       </div>
     </div>
