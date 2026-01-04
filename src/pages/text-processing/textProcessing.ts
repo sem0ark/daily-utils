@@ -60,10 +60,12 @@ export function escapeGenerics(text: string): string {
 
 export function replaceUnicode(text: string): string {
   return text
-    .replace(/[\u2000-\u200A\u202F\u205F\u3000\uFEFF]/gu, " ")
+    .replace(/[\u2000-\u200A\u202F\u205F\u3000\uFEFF]/gu, " ") // Normalize whitespace characters
+    .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/gu, "'") // Norm. single quotes/apostrophes
+    .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036\u00AB\u00BB]/gu, '"') // Norm. double quotes
     .replace(/[\u2012-\u2015\u2212]/gu, "-")
-    .replace(/[\u2022\u2023\u25E6\u2043\u2219][\s\u2000-\u200A]*/gu, "- ")
-    .replace(/[\u007F-\u009F\u2028\u2029]/gu, "")
+    .replace(/[\u2022\u2023\u25E6\u2043\u2219][\s\u2000-\u200A]*/gu, "- ") // Norm. bullets
+    .replace(/[\u007F-\u009F\u2028\u2029]/gu, "") // Remove non-printable/control chars
     .trim();
 }
 
