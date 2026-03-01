@@ -32,7 +32,7 @@ function divideMarkdown(markdownText: string): string[] {
 
   for (const line of lines) {
     const isCodeBlockDelimiter = line.trim().startsWith("```");
-    const isTopLevelHeader = line.startsWith("# ");
+    const isTopLevelHeader = line.startsWith("# ") || line.startsWith("-----");
 
     if (isCodeBlockDelimiter) {
       inCodeBlock = !inCodeBlock;
