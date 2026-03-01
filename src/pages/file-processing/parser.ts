@@ -179,8 +179,17 @@ export class MarkdownExtractor {
         let text = item.text.trim();
         if (!text) return;
 
-        if (item.metadata?.isItalic) text = text.split("\n").map((line) => line.trim()).map((line) => line ? `_${text}_` : line).join("\n");
-        if (item.metadata?.isBold) text = text.split("\n").map((line) => line ? `**${text}**` : line).join("\n");
+        if (item.metadata?.isItalic)
+          text = text
+            .split("\n")
+            .map((line) => line.trim())
+            .map((line) => (line ? `_${text}_` : line))
+            .join("\n");
+        if (item.metadata?.isBold)
+          text = text
+            .split("\n")
+            .map((line) => (line ? `**${text}**` : line))
+            .join("\n");
 
         const prev = rowItems[idx - 1];
         const space = prev ? " " : "";
