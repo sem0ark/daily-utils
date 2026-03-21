@@ -46,7 +46,7 @@ export const CommandMenu = ({
       );
 
       if (
-        ["k", "e"].includes(e.key) &&
+        ["k", "e", "p", "/"].includes(e.key) &&
         (e.metaKey || e.ctrlKey || !isInInput)
       ) {
         e.preventDefault();
