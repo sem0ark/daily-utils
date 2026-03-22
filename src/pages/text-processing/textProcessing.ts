@@ -80,6 +80,10 @@ export function joinFunctions(
     functions.reduce((text, f) => f(text), initial_text);
 }
 
+export function splitIntoChunks(text: string): string[] {
+  return text.split("\n");
+}
+
 export function restoreText(text: string): string {
   if (!text) return "";
 
@@ -103,6 +107,8 @@ export function restoreText(text: string): string {
   let restored = text;
 
   restored = restored.replace(/<br\s*\/?>/gi, "\n");
+  restored = restored.replace(/<div[^>]*>/gi, "");
+  restored = restored.replace(/<\/div>/gi, "\n");
   restored = restored.replace(/<\/?pre>/gi, "");
 
   const entityRegex = new RegExp(Object.keys(entityMap).join("|"), "g");
