@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CopyTextEntryDirect } from "../../common/components/copyTextEntry";
 import {
   escapeDollar,
@@ -19,9 +19,23 @@ const onPaste = joinFunctions(
   escapeNewLine,
 );
 
-function populateTemplate(text: string, replacement: string = ""): string {
+function populateTemplate(
+  text: string,
+  replacements: string[] | string = "",
+): string {
   const emptyTripleQuotesRegex = /"""\n*"""/g;
-  return text.replace(emptyTripleQuotesRegex, () => `"""\n${replacement}\n"""`);
+  if (Array.isArray(replacements)) {
+    let i = 0;
+    return text.replace(emptyTripleQuotesRegex, () => {
+      const val = replacements[i] ?? "";
+      i++;
+      return `"""\n${val}\n"""`;
+    });
+  }
+  return text.replace(
+    emptyTripleQuotesRegex,
+    () => `"""\n${replacements}\n"""`,
+  );
 }
 
 function divideMarkdown(markdownText: string): string[] {
@@ -353,16 +367,40 @@ const PromptFormattingForm = ({
 }: {
   templateContents: string;
 }) => {
+  const { count, placeholders } = useMemo(() => {
+    const totalOccurrences = (templateContents.match(/"""\n*"""/g) || [])
+      .length;
+
+    const matches = templateContents.matchAll(/(?:^|\n)(.*?)\n*"""\n*"""/g);
+    const discoveredPlaceholders: string[] = [];
+
+    for (const match of matches) {
+      const lineBefore = match[1]?.trim();
+      discoveredPlaceholders.push(lineBefore || "");
+    }
+
+    while (discoveredPlaceholders.length < totalOccurrences) {
+      discoveredPlaceholders.push("");
+    }
+
+    return { count: totalOccurrences, placeholders: discoveredPlaceholders };
+  }, [templateContents]);
+
   return (
     <>
       <div className="my-5 flex flex-col gap-4">
         <CopyTextEntryDirect
+          count={count}
+          placeholders={placeholders}
           onPaste={onPaste}
-          onCopy={(content: string) => {
-            const text = restoreText(content ?? "");
-            return divideMarkdown(text)
-              .map((entry) => populateTemplate(templateContents, entry))
-              .join("\n".repeat(40));
+          onCopy={(contents: string[]) => {
+            const processed = contents.map((c) => restoreText(c ?? ""));
+            if (count <= 1) {
+              return divideMarkdown(processed[0] ?? "")
+                .map((entry) => populateTemplate(templateContents, entry))
+                .join("\n".repeat(40));
+            }
+            return populateTemplate(templateContents, processed);
           }}
         />
       </div>

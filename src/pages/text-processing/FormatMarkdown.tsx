@@ -9,7 +9,7 @@ import {
 
 const onPaste = joinFunctions(replaceUnicode, removeEmoji, trimLines);
 
-const onCopy = (text: string) => replaceMarkdownElements(text);
+const onCopy = (text: string[]) => replaceMarkdownElements(text[0]);
 
 export function FormatMarkdown() {
   return (
