@@ -30,14 +30,11 @@ export const CopyTextEntryDirect = ({
   }, [count]);
 
   const handleBlur = (index: number, value: string) => {
-    const processed = onPaste(value);
-    if (processed !== value) {
-      setTexts((prev) => {
-        const next = [...prev];
-        next[index] = processed;
-        return next;
-      });
-    }
+    setTexts((prev) => {
+      const next = [...prev];
+      next[index] = onPaste(value);
+      return next;
+    });
   };
 
   return (
