@@ -29,18 +29,14 @@ export const CopyTextEntryDirect = ({
     });
   }, [count]);
 
-  const handleChange = (index: number, value: string) => {
-    setTexts((prev) => {
-      const next = [...prev];
-      next[index] = onPaste(value);
-      return next;
-    });
-  };
-
   const handleBlur = (index: number, value: string) => {
     const processed = onPaste(value);
     if (processed !== value) {
-      handleChange(index, processed);
+      setTexts((prev) => {
+        const next = [...prev];
+        next[index] = processed;
+        return next;
+      });
     }
   };
 
@@ -51,22 +47,14 @@ export const CopyTextEntryDirect = ({
 
         <div className="flex w-full flex-row gap-2">
           <div className="flex w-full flex-col gap-2">
-            {texts.map((text, i) => (
+            {texts.map((_, i) => (
               <div key={i} className="flex flex-col gap-2">
                 <textarea
                   autoFocus={autoFocus && i === 0}
                   name={`entered text ${i}`}
-                  value={text}
-                  onChange={(e) => handleChange(i, e.target.value)}
                   onBlur={(e) => handleBlur(i, e.target.value)}
                   className="w-full scroll-m-0 rounded-lg border-2 border-neutral-200 bg-neutral-100 p-4 ring-0 outline-none focus:border-neutral-500"
-                  placeholder={
-                    placeholders[i]
-                      ? `${placeholders[i]}...`
-                      : count > 1
-                        ? `Input ${i + 1}...`
-                        : ""
-                  }
+                  placeholder={(placeholders[i] ?? "Input") + "..."}
                 ></textarea>
               </div>
             ))}
