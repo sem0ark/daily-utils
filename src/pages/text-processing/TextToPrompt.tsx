@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useRef,
+  ChangeEvent,
+  DragEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { CopyTextEntryDirect } from "../../common/components/copyTextEntry";
 import {
   escapeDollar,
@@ -9,7 +17,7 @@ import {
   restoreText,
   trimLines,
 } from "./textProcessing";
-import { TrashIcon } from "@heroicons/react/24/solid";
+import { TrashIcon, CloudArrowUpIcon } from "@heroicons/react/24/solid";
 
 const onPaste = joinFunctions(
   replaceUnicode,
@@ -38,6 +46,28 @@ function populateTemplate(
   );
 }
 
+const mergeImportedTemplates = (existing: Template[], imported: Template[]) => {
+  const result = [...existing];
+  const existingNames = new Set(existing.map((t) => t.name));
+
+  for (const imp of imported) {
+    let name = imp.name ?? "Untitled";
+    if (existingNames.has(name)) {
+      let attempt = 1;
+      let newName = `${name} imported`;
+      while (existingNames.has(newName)) {
+        attempt += 1;
+        newName = `${name} imported ${attempt}`;
+      }
+      name = newName;
+    }
+
+    existingNames.add(name);
+    result.push({ name, contents: imp.contents ?? "" });
+  }
+
+  return result;
+};
 function divideMarkdown(markdownText: string): string[] {
   const lines = markdownText.split("\n");
   const mainSections: string[] = [];
@@ -245,6 +275,130 @@ const loadTemplates = (): Template[] => {
   }
 };
 
+const TemplatesImportExport = ({
+  templates,
+  onImport,
+}: {
+  templates: Template[];
+  onImport: (imported: Template[]) => void;
+}) => {
+  const fileRef = useRef<HTMLInputElement | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const doExport = () => {
+    try {
+      const data = JSON.stringify(templates, null, 2);
+      const blob = new Blob([data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "text-to-prompt-templates.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Export failed", err);
+      alert("Export failed: " + String(err));
+    }
+  };
+
+  const handleFile = (file: File | undefined) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const text = String(reader.result ?? "");
+        const parsed: Record<string, string>[] = JSON.parse(text);
+        if (!Array.isArray(parsed))
+          throw new Error("Imported JSON must be an array");
+
+        const imported = parsed.map((p) => ({
+          name: String(p.name ?? "Untitled"),
+          contents: String(p.contents ?? ""),
+        }));
+        onImport(imported);
+      } catch (err) {
+        console.error("Import failed", err);
+        alert("Import failed: " + String(err));
+      }
+    };
+    reader.onerror = () => {
+      console.error("File read error", reader.error);
+      alert("Failed to read file: " + String(reader.error));
+    };
+    reader.readAsText(file);
+  };
+
+  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    handleFile(f);
+    if (e.currentTarget) e.currentTarget.value = "";
+  };
+
+  const onDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const f = e.dataTransfer.files?.[0];
+    handleFile(f);
+  };
+
+  const onDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const onDragLeave = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  return (
+    <div className="relative mb-2">
+      <div
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        className={`group/drop flex flex-col gap-2 rounded-lg transition-all ${
+          isDragging
+            ? "border-blue-500 bg-blue-50"
+            : "border-neutral-200 bg-neutral-50"
+        }`}
+      >
+        <div
+          className={`pointer-events-none absolute inset-0 items-center justify-center rounded-lg bg-blue-500/20 transition-opacity duration-200 ease-in-out ${
+            isDragging ? "flex opacity-100" : "hidden opacity-0"
+          }`}
+        >
+          <div className="rounded-full bg-white p-2 shadow-xl">
+            <CloudArrowUpIcon className="size-8 text-blue-500" />
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={doExport}
+            className="flex-1 rounded border border-neutral-300 bg-white py-1 text-xs font-semibold text-neutral-600 hover:bg-neutral-50"
+          >
+            Export JSON
+          </button>
+          <label className="flex-1 cursor-pointer rounded border border-neutral-300 bg-white py-1 text-center text-xs font-semibold text-neutral-600 hover:bg-neutral-50">
+            <input
+              ref={fileRef}
+              onChange={onChange}
+              type="file"
+              accept="application/json"
+              className="hidden"
+            />
+            Import JSON
+          </label>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const PromptEditor = ({
   templates,
   selectedIndex,
@@ -252,6 +406,7 @@ const PromptEditor = ({
   onSelect,
   onRemove,
   onAdd,
+  onImport,
 }: {
   templates: Template[];
   selectedIndex: number;
@@ -259,6 +414,7 @@ const PromptEditor = ({
   onSelect: (index: number) => void;
   onRemove: (index: number) => void;
   onAdd: () => void;
+  onImport: (imported: Template[]) => void;
 }) => {
   const currentTemplate = templates[selectedIndex];
   const [localText, setLocalText] = useState(currentTemplate.contents);
@@ -281,10 +437,17 @@ const PromptEditor = ({
   };
 
   return (
-    <div className="flex w-full flex-col gap-4 rounded-xl border-2 border-neutral-500 bg-white p-2 lg:flex-row">
+    <div className="flex w-full flex-col gap-2 rounded-xl border-2 border-neutral-500 bg-white p-2 lg:flex-row">
       {/* Sidebar List */}
-      <div className="flex h-[200px] w-full flex-col border-b-2 border-neutral-500 pr-0 lg:h-[300px] lg:w-64 lg:border-r-2 lg:border-b-0 lg:pr-2">
-        <div className="flex-1 space-y-2 overflow-y-auto pr-2">
+      <div className="flex h-[300px] w-full flex-col border-b-2 border-neutral-500 lg:h-[400px] lg:w-64 lg:border-r-2 lg:border-b-0 lg:pr-1">
+        <div className="flex-1 space-y-2 overflow-y-auto pr-1">
+          <button
+            onClick={onAdd}
+            className="mb-2 w-full rounded-lg border-2 border-dashed border-blue-400 py-1 font-bold text-blue-600 transition-colors hover:bg-blue-50"
+          >
+            + Add New
+          </button>
+          <TemplatesImportExport templates={templates} onImport={onImport} />
           {templates.map((t, idx) => (
             <div key={idx} className="group relative border-neutral-500">
               {editingNameIndex === idx ? (
@@ -336,12 +499,6 @@ const PromptEditor = ({
               )}
             </div>
           ))}
-          <button
-            onClick={onAdd}
-            className="mb-2 w-full rounded-lg border-2 border-dashed border-blue-400 py-1 font-bold text-blue-600 transition-colors hover:bg-blue-50"
-          >
-            + Add New
-          </button>
         </div>
       </div>
 
@@ -388,7 +545,7 @@ const PromptFormattingForm = ({
 
   return (
     <>
-      <div className="my-5 flex flex-col gap-4">
+      <div className="gap-w my-5 flex flex-col">
         <CopyTextEntryDirect
           count={count}
           placeholders={placeholders}
@@ -468,6 +625,9 @@ export function TextToPrompt() {
         onUpdate={updateTemplate}
         onAdd={addNewTemplate}
         onRemove={removeTemplate}
+        onImport={(imported) =>
+          setTemplates((prev) => mergeImportedTemplates(prev, imported))
+        }
       />
       <PromptFormattingForm templateContents={currentTemplate.contents} />
     </div>

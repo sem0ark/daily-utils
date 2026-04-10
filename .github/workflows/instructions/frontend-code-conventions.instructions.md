@@ -28,30 +28,24 @@ Always consider the general user flow and application architecture. Align your i
 
 ## Component Patterns
 
-Use function components with proper TypeScript interfaces:
+Use function components without TypeScript interfaces. NEVER use default exports.
 
 ```typescript
-interface ButtonProps {
+export const Button = ({ children, onClick, variant = 'primary' }: {
   children: React.ReactNode;
   onClick: () => void;
   variant?: 'primary' | 'secondary';
-}
-
-export default function Button({ children, onClick, variant = 'primary' }: ButtonProps) {
-  return (
-    <button onClick={onClick} className={cn(buttonVariants({ variant }))}>
-      {children}
-    </button>
-  );
-}
+}) => (
+  <button onClick={onClick} className={cn(buttonVariants({ variant }))}>
+    {children}
+  </button>
+);
 ```
 
 ## Data Fetching
 
 Use Route Loaders for:
 - Initial page data required for rendering
-- SSR requirements
-- SEO-critical data
 
 Use React Query for:
 - Frequently updating data
