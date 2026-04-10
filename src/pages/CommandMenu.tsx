@@ -1,6 +1,6 @@
 import { Command } from "cmdk";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation } from "wouter";
 
 import { NAVIGATION_CONFIG } from "./routes";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
@@ -15,7 +15,7 @@ export const CommandMenu = ({
   open: boolean;
   setOpen: (open: ((prev: boolean) => boolean) | boolean) => void;
 }) => {
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
   const [history, setHistory] = useState<string[]>(() => {
     const saved = localStorage.getItem(HISTORY_KEY);
     return saved ? JSON.parse(saved) : [];
@@ -111,7 +111,7 @@ export const CommandMenu = ({
           </Command.Group>
         </Command.List>
 
-        <div className="flex items-center justify-between border-t-2 border-neutral-100 px-4 py-2 text-xs font-bold text-neutral-500">
+        <div className="flex items-center justify-between border-t-2 border-neutral-100 px-4 py-2 text-sm font-bold text-neutral-500">
           <span></span>
           <div className="flex gap-4">
             <span>↑↓ Navigate</span>

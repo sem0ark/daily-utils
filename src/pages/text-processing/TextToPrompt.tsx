@@ -281,7 +281,7 @@ const PromptEditor = ({
   };
 
   return (
-    <div className="flex w-full flex-col gap-4 rounded-xl border-2 border-neutral-500 bg-white p-4 lg:flex-row">
+    <div className="flex w-full flex-col gap-4 rounded-xl border-2 border-neutral-500 bg-white p-2 lg:flex-row">
       {/* Sidebar List */}
       <div className="flex h-[200px] w-full flex-col border-b-2 border-neutral-500 pr-0 lg:h-[300px] lg:w-64 lg:border-r-2 lg:border-b-0 lg:pr-2">
         <div className="flex-1 space-y-2 overflow-y-auto pr-2">
