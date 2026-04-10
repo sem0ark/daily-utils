@@ -225,7 +225,7 @@ export function PPTXToText() {
         {status === "done" && (
           <div className="group animate-in fade-in slide-in-from-bottom-4 relative">
             <div className="flex items-center justify-between rounded-t-lg border-2 border-b-0 border-neutral-500 bg-neutral-100 px-4 py-2">
-              <span className="text-xs font-bold">Markdown Output</span>
+              <span className="text-sm font-bold">Markdown Output</span>
               <CopyToClipboard
                 getText={copyToClipboard}
                 disabled={status !== "done"}

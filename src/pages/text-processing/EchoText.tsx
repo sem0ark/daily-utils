@@ -111,9 +111,8 @@ const CopyTextEntry = ({
   }, [originalChunks, onCopy]);
 
   return (
-    <div className="relative min-h-32 rounded-xl border-2 border-neutral-500 p-2 pb-3">
-      <div className="flex w-full flex-col gap-2 px-2">
-        <p className="font-bold text-blue-500">Enter your text here:</p>
+    <div className="relative min-h-32 rounded-xl border-2 border-neutral-500 p-2 pb-13">
+      <div className="flex w-full flex-col gap-2">
         <textarea
           autoFocus
           ref={textareaRef}
