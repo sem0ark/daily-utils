@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "wouter";
 
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import { PropsWithChildren } from "react";
@@ -9,7 +9,7 @@ export const Card = ({
   children,
 }: PropsWithChildren<{ name: string; path: string }>) => (
   <Link
-    to={path}
+    href={path}
     title={"Go to " + name}
     className="group/card mx-auto flex w-full max-w-lg flex-col rounded-lg border-2 border-neutral-500 bg-neutral-50 p-4 hover:bg-white"
   >

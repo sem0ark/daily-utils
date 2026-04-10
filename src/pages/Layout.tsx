@@ -1,6 +1,6 @@
 import { HomeIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
-import { useState } from "react";
-import { Link, Outlet } from "react-router";
+import { useState, PropsWithChildren } from "react";
+import { Link } from "wouter";
 import { CommandMenu } from "./CommandMenu";
 import { useOfflineStatus } from "../common/hooks";
 import { WifiIcon } from "@heroicons/react/24/outline";
@@ -12,7 +12,9 @@ const isMac = () => {
 
 const getModKey = () => (isMac() ? "⌘" : "Ctrl");
 
-export const Layout = () => {
+export const Layout = ({
+  children,
+}: PropsWithChildren<{ children?: React.ReactNode }>) => {
   const [open, setOpen] = useState(false);
   const isOnline = useOfflineStatus();
 
@@ -20,7 +22,7 @@ export const Layout = () => {
     <div className="m-0 min-h-dvh p-0">
       <div className="mx-auto mb-1 max-w-7xl">
         <nav className="flex flex-row gap-2 border-b-2 border-b-neutral-300 py-2">
-          <Link to="/">
+          <Link href="/">
             <HomeIcon className="size-8 h-full transition-colors duration-200 hover:text-blue-500" />
           </Link>
 
@@ -51,9 +53,7 @@ export const Layout = () => {
 
       <CommandMenu open={open} setOpen={setOpen} />
 
-      <main className="mx-auto max-w-7xl p-6">
-        <Outlet />
-      </main>
+      <main className="mx-auto max-w-7xl p-6">{children}</main>
     </div>
   );
 };
