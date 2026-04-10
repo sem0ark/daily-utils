@@ -4,7 +4,6 @@ import {
   CommandLineIcon,
   DocumentTextIcon,
   HomeIcon,
-  CheckBadgeIcon,
   CodeBracketIcon,
   PresentationChartBarIcon,
 } from "@heroicons/react/24/outline";
@@ -16,12 +15,6 @@ import { FormatMarkdown } from "./text-processing/FormatMarkdown";
 const TextToPrompt = lazy(() =>
   import("./text-processing/TextToPrompt").then((m) => ({
     default: m.TextToPrompt,
-  })),
-);
-
-const Kanban = lazy(() =>
-  import("./todo-board/TodoBoard").then((m) => ({
-    default: m.KanbanBoard,
   })),
 );
 
@@ -50,7 +43,7 @@ const lazyLoad = (Component: React.LazyExoticComponent<() => ReactElement>) => (
   </Suspense>
 );
 
-export interface NavItem {
+interface NavItem {
   name: string;
   path: string;
   description?: string;
@@ -99,16 +92,6 @@ export const NAVIGATION_CONFIG: NavItem[] = [
     tags: ["clean", "lint", "prettier", "bullets", "formatting"],
     icon: CodeBracketIcon,
     element: <FormatMarkdown />,
-    showInHome: true,
-    showInCommandMenu: true,
-  },
-  {
-    name: "Task Board",
-    path: "/todo",
-    description: "Kanban task management.",
-    tags: ["todo", "management", "organize", "tasks", "drag", "drop"],
-    icon: CheckBadgeIcon,
-    element: lazyLoad(Kanban),
     showInHome: true,
     showInCommandMenu: true,
   },
