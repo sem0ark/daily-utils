@@ -29,6 +29,25 @@ export interface WorkerInput {
   arrayBuffer: ArrayBuffer;
 }
 
+export const removeNonPrintableCharacters = (value: string) =>
+  Array.from(value)
+    .filter((char) => {
+      const code = char.codePointAt(0);
+      if (code === undefined) return false;
+
+      const isAsciiControl =
+        (code <= 0x1f && code !== 0x09 && code !== 0x0a && code !== 0x0d) ||
+        (code >= 0x7f && code <= 0x9f);
+      const isZeroWidthOrBom =
+        code === 0x200b ||
+        code === 0x200c ||
+        code === 0x200d ||
+        code === 0xfeff;
+
+      return !isAsciiControl && !isZeroWidthOrBom;
+    })
+    .join("");
+
 export class MarkdownExtractor {
   private bodyFontSize: number = 12;
   private headingLevels: number[] = [];

@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { CopyToClipboard } from "../../common/components/buttons";
 import {
   MarkdownExtractor,
+  removeNonPrintableCharacters,
   type BoundingBox,
   type ParsedPage,
   type WorkerMessage,
@@ -67,7 +68,7 @@ const processMessage = async (
               const rPr = r.getElementsByTagName("a:rPr")[0];
               const text = r.getElementsByTagName("a:t")[0]?.textContent || "";
 
-              fullText += text;
+              fullText += removeNonPrintableCharacters(text);
 
               // Check for Bold (b="1") and Italic (i="1")
               if (rPr?.getAttribute("b") === "1") isBold = true;
@@ -79,9 +80,10 @@ const processMessage = async (
             });
             fullText += "\n"; // Preserve paragraph breaks
           });
+          const cleanText = removeNonPrintableCharacters(fullText);
 
           return {
-            text: fullText.trim(),
+            text: cleanText,
             x: emuToPx(off?.getAttribute("x") || "0"),
             y: emuToPx(off?.getAttribute("y") || "0"),
             width: emuToPx(ext?.getAttribute("cx") || "0"),
@@ -135,7 +137,7 @@ const processMessage = async (
     results.sort((a, b) => a.pageNumber - b.pageNumber);
 
     const extractor = new MarkdownExtractor();
-    const markdown = extractor.extract(results);
+    const markdown = removeNonPrintableCharacters(extractor.extract(results));
 
     onMessage({ type: "SUCCESS", markdown: markdown } satisfies WorkerMessage);
   } catch (err) {

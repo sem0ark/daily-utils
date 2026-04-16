@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { CopyToClipboard } from "../../common/components/buttons";
 import * as pdfjsLib from "pdfjs-dist";
 import {
+  removeNonPrintableCharacters,
   MarkdownExtractor,
   type BoundingBox,
   type ParsedPage,
@@ -32,6 +33,7 @@ const processMessage = async (
       const items: BoundingBox[] = textContent.items
         .filter((item) => "str" in item)
         .map((item) => {
+          const cleanText = removeNonPrintableCharacters(item.str);
           const fontName = item.fontName;
           const style = styles[fontName];
 
@@ -50,7 +52,7 @@ const processMessage = async (
             lowerFont.includes("italic") || lowerFont.includes("oblique");
 
           return {
-            text: item.str,
+            text: cleanText,
             x: item.transform[4],
             y: item.transform[5],
             width: item.width,
@@ -95,7 +97,7 @@ const processMessage = async (
     }
 
     const extractor = new MarkdownExtractor();
-    const markdown = extractor.extract(results);
+    const markdown = removeNonPrintableCharacters(extractor.extract(results));
 
     onMessage({ type: "SUCCESS", markdown: markdown } satisfies WorkerMessage);
   } catch (err) {
