@@ -15,7 +15,7 @@ const isUrl = (str: string): boolean => {
 
 const processInput = async (input: string): Promise<string> => {
   console.log("[TranscriptToText] Processing input, length:", input.length);
-  
+
   try {
     let text = input;
 
@@ -31,8 +31,10 @@ const processInput = async (input: string): Promise<string> => {
 
     console.log("[TranscriptToText] Parsing JSON...");
     const json3Data = JSON.parse(text) as Json3Data;
-    console.log("[TranscriptToText] JSON parsed successfully", { events: json3Data.events?.length });
-    
+    console.log("[TranscriptToText] JSON parsed successfully", {
+      events: json3Data.events?.length,
+    });
+
     const result = segmentTranscript(json3Data);
     console.log("[TranscriptToText] Transcript segmented successfully", {
       paragraphs: result.paragraphs.length,
@@ -143,7 +145,7 @@ const TranscriptInput = ({
       />
 
       {isDragging && (
-        <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-blue-500 bg-opacity-10 backdrop-blur-sm">
+        <div className="bg-opacity-10 absolute inset-0 flex items-center justify-center rounded-xl bg-blue-500 backdrop-blur-sm">
           <div className="text-center">
             <p className="text-lg font-semibold text-blue-600">
               Drop JSON file here
@@ -192,7 +194,9 @@ export function TranscriptToText() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleProcess = useCallback(
-    async (input: string): Promise<{ success: boolean; error?: string; data?: string }> => {
+    async (
+      input: string,
+    ): Promise<{ success: boolean; error?: string; data?: string }> => {
       console.log("[TranscriptToText] handleProcess called");
       setIsLoading(true);
       try {
@@ -200,25 +204,25 @@ export function TranscriptToText() {
         console.log("[TranscriptToText] Process succeeded");
         return { success: true, data: formatted };
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Failed to process";
+        const message =
+          error instanceof Error ? error.message : "Failed to process";
         console.error("[TranscriptToText] Process failed:", message);
         return { success: false, error: message };
       } finally {
         setIsLoading(false);
       }
     },
-    []
+    [],
   );
 
   return (
     <div className="mx-auto max-w-4xl">
-      <h1 className="mb-8 text-center text-3xl font-bold">Transcript to Text</h1>
+      <h1 className="mb-8 text-center text-3xl font-bold">
+        Transcript to Text
+      </h1>
 
       <div className="my-5 flex flex-col gap-4">
-        <TranscriptInput
-          onProcess={handleProcess}
-          isLoading={isLoading}
-        />
+        <TranscriptInput onProcess={handleProcess} isLoading={isLoading} />
       </div>
     </div>
   );
