@@ -6,6 +6,7 @@ import {
   HomeIcon,
   CodeBracketIcon,
   PresentationChartBarIcon,
+  SpeakerWaveIcon,
 } from "@heroicons/react/24/outline";
 
 import { Home } from "./Home";
@@ -27,6 +28,12 @@ const PDFToText = lazy(() =>
 const PPTXToText = lazy(() =>
   import("./file-processing/PPTXToText").then((m) => ({
     default: m.PPTXToText,
+  })),
+);
+
+const TranscriptToText = lazy(() =>
+  import("./file-processing/TranscriptToText").then((m) => ({
+    default: m.TranscriptToText,
   })),
 );
 
@@ -112,6 +119,16 @@ export const NAVIGATION_CONFIG: NavItem[] = [
     tags: ["slides", "presentation", "slideshow", "parse", "convert"],
     icon: PresentationChartBarIcon,
     element: lazyLoad(PPTXToText),
+    showInHome: true,
+    showInCommandMenu: true,
+  },
+  {
+    name: "Transcript to Text",
+    path: "/transcript-to-text",
+    description: "Convert JSON3 transcripts to formatted text.",
+    tags: ["transcript", "json3", "audio", "segmentation", "parse"],
+    icon: SpeakerWaveIcon,
+    element: lazyLoad(TranscriptToText),
     showInHome: true,
     showInCommandMenu: true,
   },
