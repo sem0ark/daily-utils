@@ -1,6 +1,7 @@
 import { useRef, useCallback, useEffect, useState } from "react";
 import { CopyToClipboard } from "../../common/components/buttons";
 import { usePasteFromClipboard } from "../../common/hooks";
+import { Seo } from "../../common/components/Seo";
 import {
   escapeDollar,
   escapeGenerics,
@@ -156,6 +157,11 @@ const CopyTextEntry = ({
 export function EchoText() {
   return (
     <>
+      <Seo 
+        title="Echo Text" 
+        description="Process and clean text by escaping special characters, trimming lines, and normalizing unicode."
+        canonical="/text-processing/echo"
+      />
       <h1 className="mb-8 w-full text-center text-3xl font-bold">Echo Text</h1>
 
       <div className="my-5 flex flex-col gap-4">

@@ -2,13 +2,28 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from 'vite-plugin-pwa'
-
 import { analyzer } from 'vite-bundle-analyzer'
+import vitePrerender from 'vite-plugin-prerender'
+import path from 'path'
 
 export default defineConfig({
+  base: "/daily-utils/",
   plugins: [
     react(),
     tailwindcss(),
+    vitePrerender({
+      staticDir: path.join(__dirname, 'dist'),
+      routes: [
+        '/',
+        '/text-processing/echo',
+        '/text-processing/format-markdown',
+        '/text-processing/text-to-prompt',
+        '/file-processing/pdf-to-text',
+        '/file-processing/pptx-to-text',
+        '/file-processing/transcript-to-text',
+      ],
+      captureAfterTime: 5000,
+    }),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
@@ -38,5 +53,4 @@ export default defineConfig({
     }),
     analyzer(),
   ],
-  base: "/daily-utils",
 });

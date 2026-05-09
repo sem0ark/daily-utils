@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://arksemenov.github.io/daily-utils/sitemap.xml

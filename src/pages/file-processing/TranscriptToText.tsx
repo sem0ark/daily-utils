@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { CopyToClipboard } from "../../common/components/buttons";
+import { Seo } from "../../common/components/Seo";
 import { formatAsText, segmentTranscript } from "./transcriptionFormatter";
 import type { Json3Data } from "./transcriptionFormatter";
 
@@ -217,6 +218,11 @@ export function TranscriptToText() {
 
   return (
     <div className="mx-auto max-w-4xl">
+      <Seo 
+        title="Transcript to Text" 
+        description="Clean up and format transcriptions from YouTube or voice-to-text services."
+        canonical="/file-processing/transcript-to-text"
+      />
       <h1 className="mb-8 text-center text-3xl font-bold">
         Transcript to Text
       </h1>

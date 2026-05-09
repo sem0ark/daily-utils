@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { CopyTextEntryDirect } from "../../common/components/copyTextEntry";
+import { Seo } from "../../common/components/Seo";
 import {
   escapeDollar,
   escapeGenerics,
@@ -616,6 +617,11 @@ export function TextToPrompt() {
 
   return (
     <div className="mx-auto max-w-4xl">
+      <Seo 
+        title="Text to Prompts" 
+        description="Convert and format text into AI prompts using customizable templates."
+        canonical="/text-processing/text-to-prompt"
+      />
       <h1 className="mb-8 text-center text-3xl font-bold">Text to Prompts</h1>
 
       <PromptEditor

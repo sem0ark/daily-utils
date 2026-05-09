@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { FileUpload } from "./FileUpload";
 import clsx from "clsx";
 import { CopyToClipboard } from "../../common/components/buttons";
+import { Seo } from "../../common/components/Seo";
 import {
   MarkdownExtractor,
   removeNonPrintableCharacters,
@@ -196,6 +197,11 @@ export function PPTXToText() {
 
   return (
     <div className="mx-auto max-w-4xl">
+      <Seo 
+        title="PPTX to Markdown" 
+        description="Convert PowerPoint presentations (PPTX) to structured Markdown text."
+        canonical="/file-processing/pptx-to-text"
+      />
       <h1 className="mb-8 text-center text-3xl font-bold">PPTX to Markdown</h1>
 
       <div className="flex flex-col gap-6">
