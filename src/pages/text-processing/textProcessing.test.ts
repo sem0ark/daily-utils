@@ -412,6 +412,12 @@ describe("replaceMarkdownElements", () => {
     expect(replaceMarkdownElements(input)).toBe(expected);
   });
 
+  it("should normalize spacing in unordered lists", () => {
+    const input = "-    First\n-   Second";
+    const expected = "- First\n- Second";
+    expect(replaceMarkdownElements(input)).toBe(expected);
+  });
+
   it("should remove horizontal rules (dashes or asterisks)", () => {
     const input = "Section Above\n---\nSection Below\n***\nEnd";
     const expected = "Section Above\n\nSection Below\n\nEnd";
