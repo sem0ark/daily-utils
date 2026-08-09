@@ -139,6 +139,8 @@ export function replaceMarkdownElements(text: string): string {
       // Normalize numbered lists (ensure exactly one space after the dot)
       // Matches "1.   item" -> "1. item"
       .replace(/^(\s*)(\d+\.) +/gm, "$1$2 ")
+      // Matches "-   item" -> "- item"
+      .replace(/^(\s*)(-) +/gm, "$1$2 ")
 
       // Remove Horizontal Rules (--- or ***) that occupy a whole line
       .replace(/^-{3,}$/gm, "")
