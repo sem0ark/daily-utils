@@ -63,6 +63,18 @@ export const localApi = {
     return (await response.json()) as JobStatusResponse;
   },
 
+  async listJobs(
+    processor: string,
+    signal?: AbortSignal,
+  ): Promise<JobStatusResponse[]> {
+    const response = await fetch(
+      `${LOCAL_SERVER_URL}/v1/jobs?processor=${encodeURIComponent(processor)}`,
+      { signal },
+    );
+    if (!response.ok) await parseError(response);
+    return (await response.json()) as JobStatusResponse[];
+  },
+
   async getResult(jobId: string, signal?: AbortSignal): Promise<string[]> {
     const response = await fetch(
       `${LOCAL_SERVER_URL}/v1/jobs/${jobId}/result`,

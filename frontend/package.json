@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "prettier --write ./src && eslint ./src",
     "test": "vitest --no-isolate",
+    "test-ci": "vitest run --no-isolate",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -1,6 +1,7 @@
 import threading
 import uuid
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -9,6 +10,8 @@ from typing import Any
 class Job:
     job_id: str
     processor: str
+    file_name: str
+    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
     status: str = "pending"
     progress: int = 0
     pages_completed: int = 0
@@ -25,6 +28,8 @@ class Job:
         with self.lock:
             return {
                 "job_id": self.job_id,
+                "file_name": self.file_name,
+                "created_at": self.created_at,
                 "status": self.status,
                 "progress": self.progress,
                 "pages_completed": self.pages_completed,
@@ -49,9 +54,13 @@ class JobStore:
         self._jobs: dict[str, Job] = {}
         self._lock = threading.Lock()
 
-    def create(self, processor: str) -> Job:
+    def create(self, processor: str, file_name: str) -> Job:
         """Create and retain a job for the requested processor."""
-        job = Job(job_id=str(uuid.uuid4()), processor=processor)
+        job = Job(
+            job_id=str(uuid.uuid4()),
+            processor=processor,
+            file_name=file_name,
+        )
         with self._lock:
             self._jobs[job.job_id] = job
         return job
@@ -60,3 +69,9 @@ class JobStore:
         """Return a job by identifier, or ``None`` when it is unknown."""
         with self._lock:
             return self._jobs.get(job_id)
+
+    def list(self, processor: str) -> list[Job]:
+        """Return all jobs for a processor, newest first."""
+        with self._lock:
+            jobs = [job for job in self._jobs.values() if job.processor == processor]
+        return sorted(jobs, key=lambda job: job.created_at, reverse=True)

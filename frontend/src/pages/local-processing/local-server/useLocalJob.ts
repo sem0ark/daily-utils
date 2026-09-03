@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { localApi } from "./api";
-import type { JobStatus } from "./types";
+import type { JobStatus, JobStatusResponse } from "./types";
 
 export function useLocalJob(
   processor: string,
@@ -14,9 +14,16 @@ export function useLocalJob(
   const [pages, setPages] = useState<string[]>([]);
   const [artifact, setArtifact] = useState<Blob | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [history, setHistory] = useState<JobStatusResponse[]>([]);
   const jobId = useRef<string | null>(null);
   const timer = useRef<number | null>(null);
-  const request = useRef<AbortController | null>(null);
+
+  const refreshHistory = useCallback(() => {
+    void localApi
+      .listJobs(processor)
+      .then(setHistory)
+      .catch(() => undefined);
+  }, [processor]);
 
   const clearPolling = useCallback(() => {
     if (timer.current !== null) window.clearTimeout(timer.current);
@@ -26,9 +33,6 @@ export function useLocalJob(
   const runJob = useCallback(
     async (file: File) => {
       clearPolling();
-      request.current?.abort();
-      const controller = new AbortController();
-      request.current = controller;
       jobId.current = null;
       setStatus("pending");
       setProgress(0);
@@ -40,11 +44,13 @@ export function useLocalJob(
       setError(null);
 
       try {
-        const id = await localApi.submitJob(file, processor, controller.signal);
+        const id = await localApi.submitJob(file, processor);
         jobId.current = id;
+        refreshHistory();
 
         const poll = async () => {
-          const state = await localApi.pollJob(id, controller.signal);
+          const state = await localApi.pollJob(id);
+          refreshHistory();
           setStatus(state.status);
           setProgress(state.progress);
           setPagesCompleted(state.pages_completed);
@@ -53,9 +59,9 @@ export function useLocalJob(
 
           if (state.status === "completed") {
             if (resultMode === "file") {
-              setArtifact(await localApi.getArtifact(id, controller.signal));
+              setArtifact(await localApi.getArtifact(id));
             } else {
-              setPages(await localApi.getResult(id, controller.signal));
+              setPages(await localApi.getResult(id));
             }
             return;
           }
@@ -67,17 +73,16 @@ export function useLocalJob(
         };
         await poll();
       } catch (caught) {
-        if (controller.signal.aborted) return;
         setStatus("failed");
         setError(caught instanceof Error ? caught.message : "Local job failed");
+        refreshHistory();
       }
     },
-    [clearPolling, processor, resultMode],
+    [clearPolling, processor, refreshHistory, resultMode],
   );
 
   const cancelJob = useCallback(async () => {
     clearPolling();
-    request.current?.abort();
     if (jobId.current) {
       try {
         await localApi.cancelJob(jobId.current);
@@ -88,19 +93,56 @@ export function useLocalJob(
     jobId.current = null;
     setStatus("idle");
     setMessage("");
-  }, [clearPolling]);
+    refreshHistory();
+  }, [clearPolling, refreshHistory]);
 
-  useEffect(
-    () => () => {
-      clearPolling();
-      request.current?.abort();
-    },
-    [clearPolling],
-  );
+  const downloadJob = useCallback(async (job: JobStatusResponse) => {
+    if (job.status !== "completed") return;
+    const result = await localApi.getResult(job.job_id);
+    const blob = new Blob([result.join("\n\n---\n\n")], {
+      type: "text/plain;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const fileName = job.file_name.replace(/\.[^/.]+$/, "") || "ocr-result";
+    link.href = url;
+    link.download = `${fileName}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }, []);
+
+  const previewJob = useCallback(async (job: JobStatusResponse) => {
+    if (job.status !== "completed") return;
+    const previewWindow = window.open("about:blank", "_blank");
+    if (!previewWindow) return;
+
+    try {
+      const result = await localApi.getResult(job.job_id);
+      const blob = new Blob([result.join("\n\n---\n\n")], {
+        type: "text/plain;charset=utf-8",
+      });
+      const url = URL.createObjectURL(blob);
+      previewWindow.location.href = url;
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch {
+      previewWindow.document.body.textContent = "Could not load OCR output.";
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshHistory();
+    const historyTimer = window.setInterval(refreshHistory, 1000);
+    return () => window.clearInterval(historyTimer);
+  }, [refreshHistory]);
+
+  useEffect(() => clearPolling, [clearPolling]);
 
   return {
     runJob,
     cancelJob,
+    downloadJob,
+    previewJob,
+    history,
     status,
     progress,
     pagesCompleted,

@@ -11,6 +11,7 @@ import httpx
 from openai import OpenAI
 
 from backend.config import JOB_TIMEOUT, MLX_PORT, MODEL_PATH
+from backend.ocr.layout import parse_deepseek_blocks, xy_cut_sort
 
 LOG = logging.getLogger("daily-utils.mlx")
 
@@ -23,6 +24,8 @@ class MLXEngine:
             base_url=f"http://127.0.0.1:{MLX_PORT}/v1", api_key="local"
         )
         self._start_lock = asyncio.Lock()
+        self.model_type = "deepseek" if "deepseek" in MODEL_PATH.lower() else "generic"
+        LOG.info("Initialized MLXEngine with model type: %s", self.model_type)
 
     def _get_pids_by_port(self) -> list[int]:
         """Find every process listening on the configured port."""
@@ -34,9 +37,7 @@ class MLXEngine:
                 check=False,
             )
             return [
-                int(pid)
-                for pid in result.stdout.splitlines()
-                if pid.strip().isdigit()
+                int(pid) for pid in result.stdout.splitlines() if pid.strip().isdigit()
             ]
         except (OSError, ValueError):
             return []
@@ -85,8 +86,7 @@ class MLXEngine:
             existing_pids = await asyncio.to_thread(self._get_pids_by_port)
             if existing_pids:
                 LOG.info(
-                    f"Cleaning up stale processes {existing_pids} "
-                    f"on port {MLX_PORT}"
+                    f"Cleaning up stale processes {existing_pids} on port {MLX_PORT}"
                 )
                 await asyncio.to_thread(self._kill_by_port)
                 await asyncio.sleep(1)
@@ -102,9 +102,7 @@ class MLXEngine:
                     return
                 await asyncio.sleep(1)
 
-            raise RuntimeError(
-                "MLX server failed to start. Check the terminal output."
-            )
+            raise RuntimeError("MLX server failed to start. Check the terminal output.")
 
     async def ocr(self, image_path: Path) -> str:
         """Convert one image to markdown using the shared MLX model."""
@@ -114,12 +112,23 @@ class MLXEngine:
         image_bytes = await asyncio.to_thread(image_path.read_bytes)
         encoded = base64.b64encode(image_bytes).decode("ascii")
 
-        # We wrap the synchronous OpenAI call in to_thread to keep the loop free
-        return await asyncio.wait_for(
+        raw_output = await asyncio.wait_for(
             asyncio.to_thread(
                 self._complete, f"data:image/{image_type};base64,{encoded}"
             ),
             timeout=JOB_TIMEOUT,
+        )
+        if self.model_type == "deepseek":
+            return self._process_structured_output(raw_output)
+        return raw_output
+
+    def _process_structured_output(self, raw_text: str) -> str:
+        """Parse, order, and reconstruct DeepSeek's detected page regions."""
+        blocks = parse_deepseek_blocks(raw_text)
+        if not blocks:
+            return raw_text
+        return "\n\n".join(
+            block.content for block in xy_cut_sort(blocks) if block.content
         )
 
     def _complete(self, image_url: str) -> str:
@@ -139,6 +148,7 @@ class MLXEngine:
                 }
             ],
             max_tokens=4096,
+            temperature=0.0,
         )
         return response.choices[0].message.content or ""
 

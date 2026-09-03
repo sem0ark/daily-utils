@@ -84,7 +84,7 @@ def create_app(supported_processors: list[str] | None = None) -> FastAPI:
         """Store an upload and schedule an enabled processor."""
         if processor not in enabled_processors:
             raise HTTPException(400, "Processor is not enabled")
-        job = store.create(processor)
+        job = store.create(processor, file.filename or "upload")
         suffix = Path(file.filename or "upload").suffix or ".bin"
         temporary = Path(tempfile.gettempdir()) / f"{job.job_id}{suffix}"
         size = 0
@@ -101,6 +101,13 @@ def create_app(supported_processors: list[str] | None = None) -> FastAPI:
         background_tasks.add_task(processors[processor].process, job, temporary)
 
         return {"job_id": job.job_id}
+
+    @app.get("/v1/jobs")
+    async def list_jobs(processor: str) -> list[dict[str, Any]]:
+        """List all retained jobs for a processor, including active jobs."""
+        if processor not in enabled_processors:
+            raise HTTPException(400, "Processor is not enabled")
+        return [job.status_response() for job in store.list(processor)]
 
     @app.get("/v1/jobs/{job_id}")
     async def get_job(job_id: str) -> dict[str, Any]:

@@ -29,7 +29,8 @@ api-format:
 format: front-format api-format
 
 test:
-	cd $(FRONTEND_DIR) && pnpm run test
+	cd $(FRONTEND_DIR) && pnpm run test-ci
+	cd $(BACKEND_DIR) && PYTHONPATH=.. uv run --group dev pytest
 
 api-install:
 	cd $(BACKEND_DIR) && uv sync

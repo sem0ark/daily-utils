@@ -18,6 +18,8 @@ const LocalOCRContent = () => {
   const {
     runJob,
     cancelJob,
+    downloadJob,
+    previewJob,
     status,
     progress,
     pagesCompleted,
@@ -25,6 +27,7 @@ const LocalOCRContent = () => {
     message,
     pages,
     error,
+    history,
   } = useLocalJob("ocr");
   const isBusy = status === "pending" || status === "processing";
 
@@ -63,7 +66,10 @@ const LocalOCRContent = () => {
               />
             </div>
             <button
-              onClick={() => void cancelJob()}
+              onClick={() => {
+                if (window.confirm("Are you sure you want to cancel this job?"))
+                  void cancelJob();
+              }}
               className="mt-5 rounded-lg border-2 border-neutral-500 px-4 py-2 text-sm font-bold hover:border-blue-500"
             >
               Cancel
@@ -92,6 +98,43 @@ const LocalOCRContent = () => {
             >
               Process another file
             </button>
+          </div>
+        )}
+
+        {isEnabled && history.length > 0 && (
+          <div className="rounded-lg border-2 border-neutral-500 bg-neutral-100 p-4">
+            <h2 className="mb-3 text-lg font-bold">Previous jobs</h2>
+            <div className="flex flex-col gap-2">
+              {history.map((job) => (
+                <div
+                  key={job.job_id}
+                  className="flex items-center justify-between gap-4 rounded-md border-2 border-neutral-400 bg-white px-3 py-2 text-left"
+                >
+                  <div className="min-w-0">
+                    <div className="truncate font-bold">{job.file_name}</div>
+                    <div className="text-sm text-neutral-600">
+                      {new Date(job.created_at).toLocaleString()} · {job.status}
+                    </div>
+                  </div>
+                  {job.status === "completed" && (
+                    <div className="flex shrink-0 gap-2">
+                      <button
+                        onClick={() => void previewJob(job)}
+                        className="rounded-md border-2 border-neutral-500 px-3 py-1 text-sm font-bold hover:border-blue-500"
+                      >
+                        Preview
+                      </button>
+                      <button
+                        onClick={() => void downloadJob(job)}
+                        className="rounded-md border-2 border-neutral-500 px-3 py-1 text-sm font-bold hover:border-blue-500"
+                      >
+                        Download
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
