@@ -17,8 +17,12 @@ package = false
 
 [dependency-groups]
 mlx = [
-    "mlx-vlm>=0.3",
-    "openai>=1.0,<2",
+    "jinja2>=3.1.6",
+    "mlx-vlm==0.4.2",
+    "openai>=3.7.0",
+    "torch==2.7.0",
+    "torchaudio==2.7.0",
+    "torchvision==0.22.0",
 ]
 
 [tool.pyright]

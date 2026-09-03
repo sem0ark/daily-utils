@@ -19,8 +19,7 @@ Install the optional MLX dependency group only when OCR is needed:
 uv sync --group mlx
 ```
 
-The `mlx` group contains `mlx-vlm` and `openai`. It is intentionally separate
-so PDF conversion can run on machines that do not support MLX.
+The `mlx` group contains `jinja2`, `mlx-vlm`, and `openai`. It is intentionally separate so PDF conversion can run on machines that do not support MLX.
 
 ## Starting the server
 

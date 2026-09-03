@@ -1,6 +1,10 @@
 import asyncio
 import base64
 import logging
+import os
+import shlex
+import signal
+import subprocess
 from pathlib import Path
 
 import httpx
@@ -12,57 +16,105 @@ LOG = logging.getLogger("daily-utils.mlx")
 
 
 class MLXEngine:
-    """Owns one MLX server process and reuses its loaded model for jobs."""
+    """Manages an MLX server as a detached background process."""
 
     def __init__(self) -> None:
-        """Prepare the local client without starting an expensive model process."""
-        self.process: asyncio.subprocess.Process | None = None
         self.client = OpenAI(
             base_url=f"http://127.0.0.1:{MLX_PORT}/v1", api_key="local"
         )
         self._start_lock = asyncio.Lock()
+
+    def _get_pids_by_port(self) -> list[int]:
+        """Find every process listening on the configured port."""
+        try:
+            result = subprocess.run(
+                ["lsof", "-ti", f":{MLX_PORT}"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            return [
+                int(pid)
+                for pid in result.stdout.splitlines()
+                if pid.strip().isdigit()
+            ]
+        except (OSError, ValueError):
+            return []
+
+    def _start_server(self) -> None:
+        """Start the MLX server in the backend virtual environment."""
+        command = (
+            "source .venv/bin/activate && exec mlx_vlm.server "
+            f"--port {MLX_PORT} --model {shlex.quote(MODEL_PATH)}"
+        )
+        subprocess.Popen(
+            ["bash", "-c", command],
+            start_new_session=True,
+        )
+
+    def _kill_by_port(self) -> None:
+        """Terminate every process currently using the MLX port."""
+        for pid in self._get_pids_by_port():
+            try:
+                os.kill(pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
 
     async def is_healthy(self) -> bool:
         """Check whether the MLX server is accepting health requests."""
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.get(
-                    f"http://127.0.0.1:{MLX_PORT}/health", timeout=1
+                    f"http://127.0.0.1:{MLX_PORT}/health", timeout=2
                 )
-                return response.is_success
+                return response.status_code == 200
         except (httpx.HTTPError, OSError):
             return False
 
     async def ensure_running(self) -> None:
-        """Start the MLX server once and wait until its HTTP endpoint is ready."""
+        """Starts the MLX server if it's not already running on the port."""
         if await self.is_healthy():
             return
+
         async with self._start_lock:
+            # Double check after acquiring lock
             if await self.is_healthy():
                 return
-            LOG.info("Starting MLX server with model %s", MODEL_PATH)
-            self.process = await asyncio.create_subprocess_exec(
-                "mlx_vlm.server",
-                "--port",
-                str(MLX_PORT),
-                "--model",
-                MODEL_PATH,
-                stdout=asyncio.subprocess.DEVNULL,
-                stderr=asyncio.subprocess.STDOUT,
-            )
-            for _ in range(60):
+
+            # Clean up any zombie process on this port
+            existing_pids = await asyncio.to_thread(self._get_pids_by_port)
+            if existing_pids:
+                LOG.info(
+                    f"Cleaning up stale processes {existing_pids} "
+                    f"on port {MLX_PORT}"
+                )
+                await asyncio.to_thread(self._kill_by_port)
+                await asyncio.sleep(1)
+
+            LOG.info(f"Starting detached MLX server: {MODEL_PATH} on port {MLX_PORT}")
+
+            await asyncio.to_thread(self._start_server)
+
+            # Wait for health check
+            for i in range(60):
                 if await self.is_healthy():
-                    LOG.info("MLX server is ready")
+                    LOG.info(f"MLX server is ready (Attempt {i + 1})")
                     return
                 await asyncio.sleep(1)
-            raise RuntimeError("MLX server failed to start within 60 seconds")
+
+            raise RuntimeError(
+                "MLX server failed to start. Check the terminal output."
+            )
 
     async def ocr(self, image_path: Path) -> str:
         """Convert one image to markdown using the shared MLX model."""
         await self.ensure_running()
+
         image_type = image_path.suffix.lstrip(".").lower() or "png"
         image_bytes = await asyncio.to_thread(image_path.read_bytes)
         encoded = base64.b64encode(image_bytes).decode("ascii")
+
+        # We wrap the synchronous OpenAI call in to_thread to keep the loop free
         return await asyncio.wait_for(
             asyncio.to_thread(
                 self._complete, f"data:image/{image_type};base64,{encoded}"
@@ -71,7 +123,7 @@ class MLXEngine:
         )
 
     def _complete(self, image_url: str) -> str:
-        """Send one multimodal completion request through the OpenAI client."""
+        """Send completion request to the detached server."""
         response = self.client.chat.completions.create(
             model=MODEL_PATH,
             messages=[
@@ -91,14 +143,8 @@ class MLXEngine:
         return response.choices[0].message.content or ""
 
     async def stop(self) -> None:
-        """Terminate and reap the child server when the API shuts down."""
-        if self.process is None or self.process.returncode is not None:
-            return
-        self.process.terminate()
-        try:
-            await asyncio.wait_for(self.process.wait(), timeout=5)
-        except TimeoutError:
-            self.process.kill()
-            await self.process.wait()
-        finally:
-            self.process = None
+        """Stop every MLX server process using the configured port."""
+        pids = await asyncio.to_thread(self._get_pids_by_port)
+        if pids:
+            LOG.info(f"Stopping MLX server processes {pids}")
+            await asyncio.to_thread(self._kill_by_port)

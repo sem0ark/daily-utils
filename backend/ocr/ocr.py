@@ -97,7 +97,7 @@ class OCRProcessor:
 
     def __init__(self) -> None:
         """Create the MLX engine only when OCR is selected by the server."""
-        mlx_module = importlib.import_module("backend.mlx_engine")
+        mlx_module = importlib.import_module("backend.ocr.mlx_engine")
         self.engine = mlx_module.MLXEngine()
 
     async def process(self, job: Job, file_path: Path) -> None:
@@ -105,7 +105,6 @@ class OCRProcessor:
         await process_ocr(job, file_path, self.engine.ocr)
 
     async def stop(self) -> None:
-        """Stop the MLX server owned by this processor."""
         await self.engine.stop()
 
 

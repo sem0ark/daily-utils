@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { useLocalJob } from "./local-server/useLocalJob";
 import { FileUpload } from "../../common/FileUpload";
 import { CopyToClipboard } from "../../common/components/buttons";
@@ -28,67 +29,72 @@ const LocalOCRContent = () => {
   const isBusy = status === "pending" || status === "processing";
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <h1 className="mb-2 text-3xl font-bold">Local OCR</h1>
-      <p className="mb-8 text-neutral-600">
-        Send a PDF, image, or ZIP archive of images to your local OCR server.
-      </p>
-      <LocalProcessorNotice processor="ocr" />
+    <div className="mx-auto max-w-4xl">
+      <h1 className="mb-8 text-center text-3xl font-bold">Local OCR</h1>
 
-      {isEnabled && !isBusy && pages.length === 0 && (
-        <FileUpload
-          allowedFileTypes={["image/*", "application/pdf", ".pdf", ".zip"]}
-          onFileUpload={(files) => files[0] && void runJob(files[0])}
-        />
-      )}
+      <div className="flex flex-col gap-6">
+        <p className="text-neutral-600">
+          Send a PDF, image, or ZIP archive of images to your local OCR server.
+        </p>
+        <LocalProcessorNotice processor="ocr" />
 
-      {isEnabled && isBusy && (
-        <div className="rounded-xl border-2 border-neutral-200 p-6">
-          <div className="mb-3 flex justify-between text-sm">
-            <span>{message || "Processing..."}</span>
-            <span>
-              {progress}%
-              {totalPages > 0 && ` (${pagesCompleted}/${totalPages} pages)`}
-            </span>
+        {isEnabled && (
+          <FileUpload
+            allowedFileTypes={["image/*", "application/pdf", ".pdf", ".zip"]}
+            className={clsx(isBusy && "pointer-events-none opacity-50")}
+            onFileUpload={(files) => files[0] && void runJob(files[0])}
+          />
+        )}
+
+        {isEnabled && isBusy && (
+          <div className="rounded-lg border-2 border-neutral-500 bg-neutral-100 p-6">
+            <div className="mb-4 flex items-center justify-between text-sm font-bold">
+              <span>{message || "Processing..."}</span>
+              <span className="text-blue-500">
+                {totalPages > 0
+                  ? `${pagesCompleted} / ${totalPages} Pages`
+                  : `${progress}%`}
+              </span>
+            </div>
+            <div className="h-4 w-full overflow-hidden rounded-sm border-2 border-neutral-500 bg-white">
+              <div
+                className="h-full bg-blue-500 transition-all duration-300 ease-out"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <button
+              onClick={() => void cancelJob()}
+              className="mt-5 rounded-lg border-2 border-neutral-500 px-4 py-2 text-sm font-bold hover:border-blue-500"
+            >
+              Cancel
+            </button>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-neutral-200">
-            <div
-              className="h-full rounded-full bg-blue-600 transition-all"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <button
-            onClick={() => void cancelJob()}
-            className="mt-5 rounded-lg border-2 border-neutral-200 px-4 py-2 text-sm hover:border-neutral-500"
-          >
-            Cancel
-          </button>
-        </div>
-      )}
+        )}
 
-      {isEnabled && error && (
-        <div className="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-          {error}
-        </div>
-      )}
-
-      {isEnabled && pages.length > 0 && (
-        <div className="mt-6">
-          <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Extracted text</h2>
-            <CopyToClipboard getText={() => pages.join("\n\n---\n\n")} />
+        {isEnabled && error && (
+          <div className="rounded-lg border-2 border-red-500 bg-red-50 p-4 font-bold text-red-600">
+            {error}
           </div>
-          <pre className="max-h-[60vh] overflow-auto rounded-xl bg-neutral-100 p-5 text-sm whitespace-pre-wrap">
-            {pages.join("\n\n---\n\n")}
-          </pre>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-4 rounded-lg border-2 border-neutral-200 px-4 py-2 text-sm hover:border-neutral-500"
-          >
-            Process another file
-          </button>
-        </div>
-      )}
+        )}
+
+        {isEnabled && pages.length > 0 && (
+          <div className="group animate-in fade-in slide-in-from-bottom-4 relative">
+            <div className="flex items-center justify-between rounded-t-lg border-2 border-b-0 border-neutral-500 bg-neutral-100 px-4 py-2">
+              <span className="text-sm font-bold">Extracted Text</span>
+              <CopyToClipboard getText={() => pages.join("\n\n---\n\n")} />
+            </div>
+            <pre className="max-h-[60vh] overflow-auto rounded-b-lg border-2 border-neutral-500 bg-neutral-50 p-6 text-sm whitespace-pre-wrap">
+              {pages.join("\n\n---\n\n")}
+            </pre>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 rounded-lg border-2 border-neutral-500 px-4 py-2 text-sm font-bold hover:border-blue-500"
+            >
+              Process another file
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
