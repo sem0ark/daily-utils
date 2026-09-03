@@ -1,5 +1,10 @@
 FRONTEND_DIR := frontend
 BACKEND_DIR := backend
+API_PROCESSORS ?= ocr pdf-to-png-archive
+API_UV_GROUP :=
+ifneq (,$(findstring ocr,$(API_PROCESSORS)))
+API_UV_GROUP := --group mlx
+endif
 
 .PHONY: front-install front-dev front-build front-format api-format format test api-dev api-install
 
@@ -32,5 +37,4 @@ api-install:
 api-dev:
 	cd $(BACKEND_DIR) && \
 		PYTHONPATH=.. \
-		DAILY_UTILS_OCR_COMMAND='mlx_vlm.generate --model mlx-community/DeepSeek-OCR-2-bf16 --image {input}' \
-		uv run uvicorn main:app --host 127.0.0.1 --port 8888 --reload
+		uv run $(API_UV_GROUP) python -m backend.main $(API_PROCESSORS)
