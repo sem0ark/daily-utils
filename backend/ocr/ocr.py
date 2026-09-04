@@ -1,4 +1,5 @@
 import importlib
+import logging
 import shutil
 import tempfile
 from collections.abc import Awaitable, Callable
@@ -8,9 +9,17 @@ from zipfile import ZipFile
 import fitz
 from PIL import Image
 
+from backend.config import OUTPUT_DIR
 from backend.jobs import Job
 
+logger = logging.getLogger(__name__)
 PROCESSOR_NAME = "ocr"
+
+
+def _markdown_path(job: Job, image_number: int) -> Path:
+    """Return the durable markdown path for one processed image."""
+    file_stem = Path(job.file_name).stem or "upload"
+    return OUTPUT_DIR / f"{file_stem}-{image_number:04}.md"
 
 
 def _safe_extract_images(archive: Path, target: Path) -> list[Path]:
@@ -56,11 +65,13 @@ async def process_ocr(
     ocr: Callable[[Path], Awaitable[str]],
 ) -> None:
     """Render an upload, process each page, and publish progress on the job."""
+    logger.info(f"[OCR] Starting OCR processing for job {job.job_id}")
     temporary = Path(tempfile.mkdtemp(prefix=f"daily-utils-{job.job_id}-"))
     try:
         image_paths = _image_paths(file_path, temporary)
         if not image_paths:
             raise ValueError("No supported images found in the uploaded archive")
+        logger.info(f"[OCR] Job {job.job_id}: extracted {len(image_paths)} images")
         with job.lock:
             job.total_pages = len(image_paths)
             job.status = "processing"
@@ -68,8 +79,15 @@ async def process_ocr(
         for page_number, image_path in enumerate(image_paths, start=1):
             with job.lock:
                 if job.cancelled:
+                    logger.info(
+                        f"[OCR] Job {job.job_id} was cancelled, returning early"
+                    )
                     return
+            logger.debug(f"[OCR] Job {job.job_id}: processing page {page_number}")
             markdown = await ocr(image_path)
+            output_path = _markdown_path(job, page_number)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text(markdown, encoding="utf-8")
             with job.lock:
                 job.pages.append(markdown)
                 job.pages_completed = page_number
@@ -77,16 +95,18 @@ async def process_ocr(
                 job.message = (
                     f"Processed page {job.pages_completed} of {job.total_pages}"
                 )
+        logger.info(f"[OCR] Job {job.job_id}: OCR processing completed successfully")
         with job.lock:
             job.status = "completed"
             job.progress = 100
             job.message = "Processing complete"
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exception:
+        logger.exception(f"[OCR] Job {job.job_id}: OCR processing failed")
         with job.lock:
             if not job.cancelled:
                 job.status = "failed"
                 job.message = "Processing failed"
-                job.error = str(exc)
+                job.error = str(exception)
     finally:
         shutil.rmtree(temporary, ignore_errors=True)
         file_path.unlink(missing_ok=True)

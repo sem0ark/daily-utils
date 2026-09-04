@@ -69,6 +69,7 @@ All settings are optional environment variables:
 | `MLX_SERVER_PORT` | `11434` | MLX server port |
 | `DAILY_UTILS_MAX_FILE_SIZE` | `104857600` | Maximum upload size in bytes |
 | `DAILY_UTILS_JOB_TIMEOUT` | `1800` | OCR timeout in seconds |
+| `DAILY_UTILS_OUTPUT_DIR` | `output` | Folder for per-image OCR markdown files |
 | `DAILY_UTILS_ALLOWED_ORIGINS` | Built-in local and hosted origins | Comma-separated CORS origins |
 
 ## API workflow
@@ -99,6 +100,11 @@ curl -X POST http://127.0.0.1:8888/v1/jobs \
 The result endpoint returns JSON with `pages` for OCR and a ZIP download for
 `pdf-to-png-archive`. A processor that was not enabled at startup returns a
 `400` response when requested.
+
+OCR also writes each completed page to
+`<DAILY_UTILS_OUTPUT_DIR>/<file-name>-<image-number>.md`, using a 1-based image
+number. The default output folder is `output` in the server's working
+directory.
 
 ## Code structure
 
