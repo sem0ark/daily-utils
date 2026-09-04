@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import (
-    BackgroundTasks,
     FastAPI,
     Form,
     HTTPException,
@@ -18,7 +17,7 @@ from fastapi.responses import FileResponse, JSONResponse
 
 from backend.config import MAX_FILE_SIZE, allowed_origins
 from backend.jobs import JobStore
-from backend.processors import PROCESSOR_FACTORIES, Processor
+from backend.processors import PROCESSOR_FACTORIES, ProcessorQueue
 
 
 def create_app(supported_processors: list[str] | None = None) -> FastAPI:
@@ -30,8 +29,8 @@ def create_app(supported_processors: list[str] | None = None) -> FastAPI:
         raise ValueError(f"Unsupported processors: {names}")
 
     store = JobStore()
-    processors: dict[str, Processor] = {
-        name: factory()
+    processors: dict[str, ProcessorQueue] = {
+        name: ProcessorQueue(factory())
         for name, factory in PROCESSOR_FACTORIES.items()
         if name in enabled_processors
     }
@@ -77,7 +76,6 @@ def create_app(supported_processors: list[str] | None = None) -> FastAPI:
 
     @app.post("/v1/jobs", status_code=202)
     async def create_job(
-        background_tasks: BackgroundTasks,
         file: UploadFile,
         processor: str = Form(...),
     ) -> dict[str, str]:
@@ -98,7 +96,7 @@ def create_app(supported_processors: list[str] | None = None) -> FastAPI:
         if size == 0:
             temporary.unlink(missing_ok=True)
             raise HTTPException(400, "File is empty")
-        background_tasks.add_task(processors[processor].process, job, temporary)
+        await processors[processor].enqueue(job, temporary)
 
         return {"job_id": job.job_id}
 

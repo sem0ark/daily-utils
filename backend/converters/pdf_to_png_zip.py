@@ -71,6 +71,8 @@ def process_pdf_to_png_zip(job: Job, file_path: Path) -> None:
 class PDFToPNGArchiveProcessor:
     """Provide PDF-to-PNG archive processing without optional dependencies."""
 
+    max_parallel_processes = 5
+
     async def process(self, job: Job, file_path: Path) -> None:
         """Run the synchronous converter as a background task."""
         await asyncio.to_thread(process_pdf_to_png_zip, job, file_path)

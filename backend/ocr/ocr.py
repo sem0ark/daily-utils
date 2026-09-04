@@ -95,6 +95,8 @@ async def process_ocr(
 class OCRProcessor:
     """Own the OCR processor's MLX dependency and lifecycle."""
 
+    max_parallel_processes = 1
+
     def __init__(self) -> None:
         """Create the MLX engine only when OCR is selected by the server."""
         mlx_module = importlib.import_module("backend.ocr.mlx_engine")
