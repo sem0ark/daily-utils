@@ -44,3 +44,6 @@ jobs:
 
       - name: Run Tests
         run: pnpm test
+
+      - name: Build Frontend
+        run: pnpm build
