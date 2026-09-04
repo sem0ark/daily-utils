@@ -1,3 +1,4 @@
+import logging
 import tempfile
 from collections.abc import AsyncGenerator, Awaitable, Callable
 from contextlib import asynccontextmanager
@@ -18,6 +19,8 @@ from fastapi.responses import FileResponse, JSONResponse
 from backend.config import MAX_FILE_SIZE, allowed_origins
 from backend.jobs import JobStore
 from backend.processors import PROCESSOR_FACTORIES, ProcessorQueue
+
+logger = logging.getLogger(__name__)
 
 
 def create_app(supported_processors: list[str] | None = None) -> FastAPI:
@@ -81,8 +84,12 @@ def create_app(supported_processors: list[str] | None = None) -> FastAPI:
     ) -> dict[str, str]:
         """Store an upload and schedule an enabled processor."""
         if processor not in enabled_processors:
+            logger.warning(f"Rejected upload: processor '{processor}' not enabled")
             raise HTTPException(400, "Processor is not enabled")
         job = store.create(processor, file.filename or "upload")
+        logger.info(
+            f"Uploading file for job {job.job_id}: {file.filename} (processor: {processor})"
+        )
         suffix = Path(file.filename or "upload").suffix or ".bin"
         temporary = Path(tempfile.gettempdir()) / f"{job.job_id}{suffix}"
         size = 0
@@ -91,11 +98,19 @@ def create_app(supported_processors: list[str] | None = None) -> FastAPI:
                 size += len(chunk)
                 if size > MAX_FILE_SIZE:
                     temporary.unlink(missing_ok=True)
+                    size_mb = size / (1024 * 1024)
+                    max_mb = MAX_FILE_SIZE / (1024 * 1024)
+                    logger.warning(
+                        f"File rejected for job {job.job_id}: {size_mb:.2f}MB exceeds limit of {max_mb:.2f}MB"
+                    )
                     raise HTTPException(413, "File is too large")
                 output.write(chunk)
         if size == 0:
             temporary.unlink(missing_ok=True)
+            logger.warning(f"File rejected for job {job.job_id}: empty file")
             raise HTTPException(400, "File is empty")
+        size_mb = size / (1024 * 1024)
+        logger.info(f"File accepted for job {job.job_id}: {size_mb:.2f}MB")
         await processors[processor].enqueue(job, temporary)
 
         return {"job_id": job.job_id}
