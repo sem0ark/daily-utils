@@ -7,6 +7,7 @@ import {
   CodeBracketIcon,
   PresentationChartBarIcon,
   SpeakerWaveIcon,
+  CpuChipIcon,
 } from "@heroicons/react/24/outline";
 
 import { Home } from "./Home";
@@ -34,6 +35,18 @@ const PPTXToText = lazy(() =>
 const TranscriptToText = lazy(() =>
   import("./file-processing/TranscriptToText").then((m) => ({
     default: m.TranscriptToText,
+  })),
+);
+
+const LocalOCR = lazy(() =>
+  import("./local-processing/LocalOCR").then((m) => ({
+    default: m.LocalOCR,
+  })),
+);
+
+const LocalPDFToImages = lazy(() =>
+  import("./local-processing/LocalPDFToImages").then((m) => ({
+    default: m.LocalPDFToImages,
   })),
 );
 
@@ -129,6 +142,26 @@ export const NAVIGATION_CONFIG: NavItem[] = [
     tags: ["transcript", "json3", "audio", "segmentation", "parse"],
     icon: SpeakerWaveIcon,
     element: lazyLoad(TranscriptToText),
+    showInHome: true,
+    showInCommandMenu: true,
+  },
+  {
+    name: "Local OCR",
+    path: "/local-processing/ocr",
+    description: "Extract text with a local vision model.",
+    tags: ["local", "ocr", "image", "ai", "document"],
+    icon: CpuChipIcon,
+    element: lazyLoad(LocalOCR),
+    showInHome: true,
+    showInCommandMenu: true,
+  },
+  {
+    name: "Local PDF to PNGs",
+    path: "/local-processing/pdf-to-png",
+    description: "Convert PDF pages to a compressed PNG ZIP archive.",
+    tags: ["local", "pdf", "png", "zip", "images", "convert"],
+    icon: DocumentTextIcon,
+    element: lazyLoad(LocalPDFToImages),
     showInHome: true,
     showInCommandMenu: true,
   },

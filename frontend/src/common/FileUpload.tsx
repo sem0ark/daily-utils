@@ -7,7 +7,18 @@ const validateFile = (
   allowedFileTypes: string[],
 ): boolean => {
   if (!file) return false;
-  if (allowedFileTypes.length > 0 && !allowedFileTypes.includes(file.type)) {
+  if (
+    allowedFileTypes.length > 0 &&
+    !allowedFileTypes.some(
+      (allowedType) =>
+        allowedType === "*" ||
+        allowedType === file.type ||
+        (allowedType.endsWith("/*") &&
+          file.type.startsWith(allowedType.slice(0, -1))) ||
+        (allowedType.startsWith(".") &&
+          file.name.toLowerCase().endsWith(allowedType.toLowerCase())),
+    )
+  ) {
     return false;
   }
   return true;

@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { FileUpload } from "./FileUpload";
+import { FileUpload } from "../../common/FileUpload";
 import clsx from "clsx";
 import { CopyToClipboard } from "../../common/components/buttons";
 import {
