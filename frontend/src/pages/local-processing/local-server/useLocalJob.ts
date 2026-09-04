@@ -16,23 +16,23 @@ export function useLocalJob(
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<JobStatusResponse[]>([]);
   const jobId = useRef<string | null>(null);
-  const timer = useRef<number | null>(null);
+  const timers = useRef(new Map<string, number>());
 
-  const refreshHistory = useCallback(() => {
-    void localApi
-      .listJobs(processor)
-      .then(setHistory)
-      .catch(() => undefined);
+  const refreshHistory = useCallback(async () => {
+    try {
+      setHistory(await localApi.listJobs(processor));
+    } catch {
+      // Local server may be unavailable while the page is open.
+    }
   }, [processor]);
 
   const clearPolling = useCallback(() => {
-    if (timer.current !== null) window.clearTimeout(timer.current);
-    timer.current = null;
+    for (const timer of timers.current.values()) window.clearTimeout(timer);
+    timers.current.clear();
   }, []);
 
   const runJob = useCallback(
     async (file: File) => {
-      clearPolling();
       jobId.current = null;
       setStatus("pending");
       setProgress(0);
@@ -69,7 +69,10 @@ export function useLocalJob(
             setError(state.error || state.message);
             return;
           }
-          timer.current = window.setTimeout(() => void poll(), 1000);
+          timers.current.set(
+            id,
+            window.setTimeout(() => void poll(), 1000),
+          );
         };
         await poll();
       } catch (caught) {
@@ -81,35 +84,50 @@ export function useLocalJob(
     [clearPolling, processor, refreshHistory, resultMode],
   );
 
-  const cancelJob = useCallback(async () => {
-    clearPolling();
-    if (jobId.current) {
-      try {
-        await localApi.cancelJob(jobId.current);
-      } catch {
-        // The job may have completed between polling and cancellation.
+  const cancelJob = useCallback(
+    async (requestedJobId?: string) => {
+      const cancelledJobId = requestedJobId || jobId.current;
+      if (cancelledJobId) {
+        const timer = timers.current.get(cancelledJobId);
+        if (timer !== undefined) window.clearTimeout(timer);
+        timers.current.delete(cancelledJobId);
+        try {
+          await localApi.cancelJob(cancelledJobId);
+        } catch {
+          // The job may have completed between polling and cancellation.
+        }
       }
-    }
-    jobId.current = null;
-    setStatus("idle");
-    setMessage("");
-    refreshHistory();
-  }, [clearPolling, refreshHistory]);
+      jobId.current = null;
+      setStatus("idle");
+      setMessage("");
+      await refreshHistory();
+    },
+    [refreshHistory],
+  );
 
-  const downloadJob = useCallback(async (job: JobStatusResponse) => {
-    if (job.status !== "completed") return;
-    const result = await localApi.getResult(job.job_id);
-    const blob = new Blob([result.join("\n\n---\n\n")], {
-      type: "text/plain;charset=utf-8",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    const fileName = job.file_name.replace(/\.[^/.]+$/, "") || "ocr-result";
-    link.href = url;
-    link.download = `${fileName}.txt`;
-    link.click();
-    URL.revokeObjectURL(url);
-  }, []);
+  const downloadJob = useCallback(
+    async (job: JobStatusResponse) => {
+      if (job.status !== "completed") return;
+      const blob =
+        resultMode === "file"
+          ? await localApi.getArtifact(job.job_id)
+          : new Blob(
+              [(await localApi.getResult(job.job_id)).join("\n\n---\n\n")],
+              {
+                type: "text/plain;charset=utf-8",
+              },
+            );
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const fileName = job.file_name.replace(/\.[^/.]+$/, "") || "result";
+      link.href = url;
+      link.download =
+        resultMode === "file" ? `${fileName}-images.zip` : `${fileName}.txt`;
+      link.click();
+      URL.revokeObjectURL(url);
+    },
+    [resultMode],
+  );
 
   const previewJob = useCallback(async (job: JobStatusResponse) => {
     if (job.status !== "completed") return;
@@ -130,10 +148,33 @@ export function useLocalJob(
   }, []);
 
   useEffect(() => {
-    refreshHistory();
-    const historyTimer = window.setInterval(refreshHistory, 1000);
-    return () => window.clearInterval(historyTimer);
-  }, [refreshHistory]);
+    let isCancelled = false;
+    let historyTimer: number | null = null;
+
+    const poll = async () => {
+      try {
+        const jobs = await localApi.listJobs(processor);
+        if (isCancelled) return;
+        setHistory(jobs);
+        if (
+          jobs.some(
+            (job) => job.status !== "completed" && job.status !== "failed",
+          )
+        ) {
+          historyTimer = window.setTimeout(() => void poll(), 1000);
+        }
+      } catch {
+        if (!isCancelled)
+          historyTimer = window.setTimeout(() => void poll(), 1000);
+      }
+    };
+
+    void poll();
+    return () => {
+      isCancelled = true;
+      if (historyTimer !== null) window.clearTimeout(historyTimer);
+    };
+  }, [processor]);
 
   useEffect(() => clearPolling, [clearPolling]);
 
