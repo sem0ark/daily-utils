@@ -14,7 +14,7 @@ export const LocalPDFToImages = () => (
 const LocalPDFToImagesContent = () => {
   const { isAvailable, processors } = useLocalServerDiscovery();
   const isEnabled = isAvailable && processors.includes("pdf-to-png-archive");
-  const { runJob, history, downloadJob } = useLocalJob(
+  const { runJob, cancelJob, history, downloadJob } = useLocalJob(
     "pdf-to-png-archive",
     "file",
   );
