@@ -51,7 +51,7 @@ interface Paragraph {
   text: string;
 }
 
-interface SegmentationOptions {
+export interface SegmentationOptions {
   sentenceThreshold?: number;
   /** Lower = more paragraph splits. Multiplier on Silverman bandwidth. */
   paragraphBandwidthScale?: number;
@@ -62,6 +62,8 @@ interface SegmentationOptions {
   kdeSamples?: number;
   /** Percentile at which to winsorize gaps before KDE (to tame lecture outliers). */
   winsorizePercentile?: number;
+  /** Limit segmentation to the first N parsed words, primarily for previews. */
+  maxWords?: number;
 }
 
 interface KdeAnalysis {
@@ -86,16 +88,20 @@ export interface SegmentationResult {
   };
 }
 
-function parseWordsFromJson3(data: Json3Data): Word[] {
+function parseWordsFromJson3(data: Json3Data, maxWords?: number): Word[] {
   const words: Word[] = [];
   const events = data.events ?? [];
 
   for (const event of events) {
+    if (maxWords !== undefined && words.length >= maxWords) break;
+
     const segs = event.segs;
     if (!segs) continue;
     const tStart = event.tStartMs ?? 0;
 
     for (let i = 0; i < segs.length; i++) {
+      if (maxWords !== undefined && words.length >= maxWords) break;
+
       const seg = segs[i];
       const utf8 = seg.utf8 ?? "";
       const tOffset = seg.tOffsetMs ?? 0;
@@ -489,9 +495,10 @@ export function segmentTranscript(
     fallbackQuantile = 0.3,
     kdeSamples = 1000,
     winsorizePercentile = 0.95,
+    maxWords,
   } = options;
 
-  const words = parseWordsFromJson3(data);
+  const words = parseWordsFromJson3(data, maxWords);
   if (words.length === 0) {
     return {
       paragraphs: [],
