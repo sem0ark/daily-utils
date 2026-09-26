@@ -8,28 +8,18 @@ import {
   interquartileRange as ssIqr,
 } from "simple-statistics";
 
-export interface Json3Segment {
+export interface TranscriptSegment {
   utf8?: string;
   tOffsetMs?: number;
 }
 
-export interface Json3Event {
+export interface TranscriptEvent {
   tStartMs?: number;
-  dDurationMs?: number;
-  id?: number;
-  wWinId?: number;
-  wpWinPosId?: number;
-  wsWinStyleId?: number;
-  aAppend?: number;
-  segs?: Json3Segment[];
+  segs?: TranscriptSegment[];
 }
 
-export interface Json3Data {
-  wireMagic?: string;
-  pens?: unknown[];
-  wsWinStyles?: unknown[];
-  wpWinPositions?: unknown[];
-  events?: Json3Event[];
+export interface TranscriptData {
+  events: TranscriptEvent[];
 }
 
 interface Word {
@@ -88,7 +78,10 @@ export interface SegmentationResult {
   };
 }
 
-function parseWordsFromJson3(data: Json3Data, maxWords?: number): Word[] {
+function parseWordsFromTranscript(
+  data: TranscriptData,
+  maxWords?: number,
+): Word[] {
   const words: Word[] = [];
   const events = data.events ?? [];
 
@@ -485,7 +478,7 @@ function detectParagraphBoundaries(
 }
 
 export function segmentTranscript(
-  data: Json3Data,
+  data: TranscriptData,
   options: SegmentationOptions = {},
 ): SegmentationResult {
   const {
@@ -498,7 +491,7 @@ export function segmentTranscript(
     maxWords,
   } = options;
 
-  const words = parseWordsFromJson3(data, maxWords);
+  const words = parseWordsFromTranscript(data, maxWords);
   if (words.length === 0) {
     return {
       paragraphs: [],

@@ -138,8 +138,8 @@ export const NAVIGATION_CONFIG: NavItem[] = [
   {
     name: "Transcript to Text",
     path: "/transcript-to-text",
-    description: "Convert JSON3 transcripts to formatted text.",
-    tags: ["transcript", "json3", "audio", "segmentation", "parse"],
+    description: "Convert JSON3 and SRT transcripts to formatted text.",
+    tags: ["transcript", "json3", "srt", "audio", "segmentation", "parse"],
     icon: SpeakerWaveIcon,
     element: lazyLoad(TranscriptToText),
     showInHome: true,
