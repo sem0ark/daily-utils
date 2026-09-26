@@ -1,7 +1,12 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { CopyToClipboard } from "../../common/components/buttons";
 import { formatAsText, segmentTranscript } from "./transcriptionFormatter";
-import type { Json3Data, SegmentationOptions } from "./transcriptionFormatter";
+import type {
+  TranscriptData,
+  SegmentationOptions,
+} from "./transcriptionFormatter";
+import { parseTranscript } from "./transcriptParser";
+import type { ParsedTranscript } from "./transcriptParser";
 
 const isUrl = (str: string): boolean => {
   try {
@@ -13,7 +18,7 @@ const isUrl = (str: string): boolean => {
   }
 };
 
-const parseInput = async (input: string): Promise<Json3Data> => {
+const parseInput = async (input: string): Promise<ParsedTranscript> => {
   console.log("[TranscriptToText] Processing input, length:", input.length);
 
   let text = input;
@@ -28,19 +33,19 @@ const parseInput = async (input: string): Promise<Json3Data> => {
     console.log("[TranscriptToText] URL fetched successfully");
   }
 
-  console.log("[TranscriptToText] Parsing JSON...");
-  const json3Data = JSON.parse(text) as Json3Data;
-  console.log("[TranscriptToText] JSON parsed successfully", {
-    events: json3Data.events?.length,
+  const parsed = parseTranscript(text);
+  console.log("[TranscriptToText] Transcript parsed successfully", {
+    format: parsed.format,
+    events: parsed.data.events?.length,
   });
-  return json3Data;
+  return parsed;
 };
 
 const formatInput = (
-  json3Data: Json3Data,
+  transcriptData: TranscriptData,
   options: SegmentationOptions = {},
 ): string => {
-  const result = segmentTranscript(json3Data, options);
+  const result = segmentTranscript(transcriptData, options);
   console.log("[TranscriptToText] Transcript segmented successfully", {
     paragraphs: result.paragraphs.length,
     sentences: result.sentences.length,
@@ -52,9 +57,10 @@ const formatInput = (
 const processInput = async (
   input: string,
   options: SegmentationOptions,
+  parsed?: ParsedTranscript,
 ): Promise<string> => {
   try {
-    return formatInput(await parseInput(input), options);
+    return formatInput((parsed ?? (await parseInput(input))).data, options);
   } catch (error) {
     console.error("[TranscriptToText] Error:", error);
     throw error;
@@ -65,6 +71,7 @@ interface TranscriptInputProps {
   onProcess: (
     input: string,
     options: SegmentationOptions,
+    parsed?: ParsedTranscript,
   ) => Promise<{ success: boolean; error?: string; data?: string }>;
   isLoading?: boolean;
 }
@@ -76,7 +83,8 @@ const TranscriptInput = ({
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [jsonData, setJsonData] = useState<Json3Data | null>(null);
+  const [parsedTranscript, setParsedTranscript] =
+    useState<ParsedTranscript | null>(null);
   const [previewError, setPreviewError] = useState(false);
   const [sentenceThreshold, setSentenceThreshold] = useState(6);
   const [paragraphBandwidthScale, setParagraphBandwidthScale] = useState(1.5);
@@ -88,33 +96,46 @@ const TranscriptInput = ({
   );
 
   const preview = useMemo(() => {
-    if (!jsonData) return "";
-    return formatInput(jsonData, { ...formatOptions, maxWords: 1000 });
-  }, [formatOptions, jsonData]);
+    if (!parsedTranscript) return "";
+    return formatInput(parsedTranscript.data, {
+      ...formatOptions,
+      maxWords: 1000,
+    });
+  }, [formatOptions, parsedTranscript]);
 
   useEffect(() => {
-    if (!input.trim() || isUrl(input)) {
-      setJsonData(null);
+    if (!input.trim()) {
+      setParsedTranscript(null);
       setPreviewError(false);
       return;
     }
 
+    let cancelled = false;
     const timer = window.setTimeout(() => {
-      try {
-        setJsonData(JSON.parse(input) as Json3Data);
-        setPreviewError(false);
-      } catch {
-        setJsonData(null);
-        setPreviewError(true);
-      }
+      parseInput(input)
+        .then((parsed) => {
+          if (cancelled) return;
+          setParsedTranscript(parsed);
+          setPreviewError(false);
+        })
+        .catch(() => {
+          if (cancelled) return;
+          setParsedTranscript(null);
+          setPreviewError(true);
+        });
     }, 300);
 
-    return () => window.clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, [input]);
 
   const handleInput = (text: string) => {
     console.log("[TranscriptInput] Input changed, length:", text.length);
     setInput(text);
+    setParsedTranscript(null);
+    setPreviewError(false);
     setError(null);
   };
 
@@ -139,7 +160,7 @@ const TranscriptInput = ({
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       const file = files[0];
-      if (file.type === "application/json" || file.name.endsWith(".json")) {
+      if (file.type === "application/json" || file.type === "text/plain") {
         try {
           const text = await file.text();
           handleInput(text);
@@ -147,7 +168,7 @@ const TranscriptInput = ({
           setError(err instanceof Error ? err.message : "Failed to read file");
         }
       } else {
-        setError("Please drop a JSON file");
+        setError("Please drop a JSON3 or SRT file");
       }
     }
   };
@@ -155,10 +176,14 @@ const TranscriptInput = ({
   const handeGetText = async () => {
     console.log("[TranscriptInput] handleGetText (Copy triggered)");
     if (!input.trim()) {
-      setError("Please enter JSON or a URL");
+      setError("Please enter JSON3, SRT, or a URL");
       throw new Error("Empty input");
     }
-    const res = await onProcess(input, formatOptions);
+    const res = await onProcess(
+      input,
+      formatOptions,
+      parsedTranscript ?? undefined,
+    );
     if (!res.success) {
       setError(res.error || "Failed to process input");
       throw new Error(res.error || "Failed to process input");
@@ -180,7 +205,7 @@ const TranscriptInput = ({
       <input
         ref={fileInputRef}
         type="file"
-        accept=".json"
+        accept=".json,.srt,application/json,text/plain"
         onChange={(e) => {
           if (e.target.files?.[0]) {
             const file = e.target.files[0];
@@ -194,7 +219,7 @@ const TranscriptInput = ({
         <div className="bg-opacity-10 absolute inset-0 flex items-center justify-center rounded-xl bg-blue-500 backdrop-blur-sm">
           <div className="text-center">
             <p className="text-lg font-semibold text-blue-600">
-              Drop JSON file here
+              Drop JSON3 or SRT file here
             </p>
           </div>
         </div>
@@ -220,7 +245,7 @@ const TranscriptInput = ({
               onChange={(e) => handleInput(e.target.value)}
               disabled={isLoading}
               className="h-36 w-full scroll-m-0 rounded-lg border-2 border-neutral-200 bg-neutral-100 p-2 font-mono ring-0 outline-none focus:border-neutral-500 disabled:bg-neutral-200"
-              placeholder="Paste JSON3 transcript or URL here... (or drag & drop JSON file)"
+              placeholder="Paste JSON3 or SRT transcript or URL here... (or drag & drop a file)"
             />
           )}
           {error && (
@@ -283,7 +308,7 @@ const TranscriptInput = ({
         </div>
         {previewError ? (
           <p className="text-neutral-500">
-            Preview unavailable until the input is valid JSON.
+            Preview unavailable until the input is valid JSON3 or SRT.
           </p>
         ) : preview ? (
           <pre className="max-h-96 overflow-auto font-mono whitespace-pre-wrap text-neutral-800">
@@ -291,7 +316,7 @@ const TranscriptInput = ({
           </pre>
         ) : (
           <p className="text-neutral-500">
-            Paste or import a JSON transcript to preview the formatting.
+            Paste or import a JSON3 or SRT transcript to preview the formatting.
           </p>
         )}
       </div>
@@ -306,11 +331,12 @@ export function TranscriptToText() {
     async (
       input: string,
       options: SegmentationOptions,
+      parsed?: ParsedTranscript,
     ): Promise<{ success: boolean; error?: string; data?: string }> => {
       console.log("[TranscriptToText] handleProcess called");
       setIsLoading(true);
       try {
-        const formatted = await processInput(input, options);
+        const formatted = await processInput(input, options, parsed);
         console.log("[TranscriptToText] Process succeeded");
         return { success: true, data: formatted };
       } catch (error) {
