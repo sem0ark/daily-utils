@@ -59,7 +59,7 @@ export function useLocalJob(
 
           if (state.status === "completed") {
             if (resultMode === "file") {
-              setArtifact(await localApi.getArtifact(id));
+              setArtifact(null);
             } else {
               setPages(await localApi.getResult(id));
             }
@@ -108,21 +108,28 @@ export function useLocalJob(
   const downloadJob = useCallback(
     async (job: JobStatusResponse) => {
       if (job.status !== "completed") return;
-      const blob =
-        resultMode === "file"
-          ? await localApi.getArtifact(job.job_id)
-          : new Blob(
-              [(await localApi.getResult(job.job_id)).join("\n\n---\n\n")],
-              {
-                type: "text/plain;charset=utf-8",
-              },
-            );
+      const fileName = job.file_name.replace(/\.[^/.]+$/, "") || "result";
+      if (resultMode === "file") {
+        const artifacts = await localApi.getArtifacts(job.job_id);
+        for (const artifact of artifacts.files) {
+          const blob = await localApi.getArtifact(job.job_id, artifact.file_name);
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = artifact.name;
+          link.click();
+          URL.revokeObjectURL(url);
+        }
+        return;
+      }
+      const blob = new Blob(
+        [(await localApi.getResult(job.job_id)).join("\n\n---\n\n")],
+        { type: "text/plain;charset=utf-8" },
+      );
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      const fileName = job.file_name.replace(/\.[^/.]+$/, "") || "result";
       link.href = url;
-      link.download =
-        resultMode === "file" ? `${fileName}-images.zip` : `${fileName}.txt`;
+      link.download = `${fileName}.txt`;
       link.click();
       URL.revokeObjectURL(url);
     },
