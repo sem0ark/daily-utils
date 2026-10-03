@@ -15,6 +15,17 @@ export interface JobStatusResponse {
   total_pages: number;
   message: string;
   error: string | null;
+  result_files: string[];
+}
+
+export interface JobArtifact {
+  name: string;
+  file_name: string;
+  url: string;
+}
+
+export interface JobArtifactsResponse {
+  files: JobArtifact[];
 }
 
 export type LocalJobHistoryEntry = JobStatusResponse;

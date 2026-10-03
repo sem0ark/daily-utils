@@ -144,14 +144,42 @@ def create_app(supported_processors: list[str] | None = None) -> FastAPI:
             if job.status != "completed":
                 raise HTTPException(409, "Job not completed")
             if job.processor == "pdf-to-png-archive":
-                if job.result_path is None or not job.result_path.is_file():
+                files = [
+                    {
+                        "name": (f"{Path(job.file_name).stem}-images-{index:03d}.zip"),
+                        "file_name": path.name,
+                        "url": f"/v1/jobs/{job_id}/result/{path.name}",
+                    }
+                    for index, path in enumerate(job.result_paths, start=1)
+                    if path.is_file()
+                ]
+                if not files:
                     raise HTTPException(404, "Job result not found")
-                return FileResponse(
-                    job.result_path,
-                    media_type="application/zip",
-                    filename="document-images.zip",
-                )
+                return JSONResponse(content={"files": files})
             return JSONResponse(content={"pages": job.pages})
+
+    @app.get("/v1/jobs/{job_id}/result/{file_name}")
+    async def get_result_file(job_id: str, file_name: str) -> Response:
+        """Download one page-group archive from a completed conversion."""
+        job = store.get(job_id)
+        if job is None:
+            raise HTTPException(404, "Job not found")
+        if Path(file_name).name != file_name:
+            raise HTTPException(400, "Invalid result filename")
+        with job.lock:
+            if job.status != "completed":
+                raise HTTPException(409, "Job not completed")
+            result = next(
+                (path for path in job.result_paths if path.name == file_name),
+                None,
+            )
+            if result is None or not result.is_file():
+                raise HTTPException(404, "Job result not found")
+            return FileResponse(
+                result,
+                media_type="application/zip",
+                filename=result.name,
+            )
 
     @app.delete("/v1/jobs/{job_id}", status_code=204)
     async def cancel_job(job_id: str) -> None:

@@ -1,5 +1,6 @@
 import type {
   JobResultResponse,
+  JobArtifactsResponse,
   JobStatusResponse,
   LocalServerHealthResponse,
 } from "./types";
@@ -87,12 +88,28 @@ export const localApi = {
     return data.pages;
   },
 
-  async getArtifact(jobId: string, signal?: AbortSignal): Promise<Blob> {
+  async getArtifacts(
+    jobId: string,
+    signal?: AbortSignal,
+  ): Promise<JobArtifactsResponse> {
     const response = await fetch(
       `${LOCAL_SERVER_URL}/v1/jobs/${jobId}/result`,
       {
         signal,
       },
+    );
+    if (!response.ok) await parseError(response);
+    return (await response.json()) as JobArtifactsResponse;
+  },
+
+  async getArtifact(
+    jobId: string,
+    fileName: string,
+    signal?: AbortSignal,
+  ): Promise<Blob> {
+    const response = await fetch(
+      `${LOCAL_SERVER_URL}/v1/jobs/${jobId}/result/${encodeURIComponent(fileName)}`,
+      { signal },
     );
     if (!response.ok) await parseError(response);
     return response.blob();
