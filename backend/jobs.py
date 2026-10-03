@@ -19,6 +19,7 @@ class Job:
     message: str = "Queued"
     pages: list[str] = field(default_factory=list)
     result_path: Path | None = None
+    result_paths: list[Path] = field(default_factory=list)
     error: str | None = None
     cancelled: bool = False
     lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
@@ -36,6 +37,7 @@ class Job:
                 "total_pages": self.total_pages,
                 "message": self.message,
                 "error": self.error,
+                "result_files": [path.name for path in self.result_paths],
             }
 
     def set_progress(self, progress: int, message: str) -> None:

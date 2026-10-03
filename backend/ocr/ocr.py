@@ -1,4 +1,5 @@
 import importlib
+import json
 import logging
 import shutil
 import tempfile
@@ -20,6 +21,35 @@ def _markdown_path(job: Job, image_number: int) -> Path:
     """Return the durable markdown path for one processed image."""
     file_stem = Path(job.file_name).stem or "upload"
     return OUTPUT_DIR / f"{file_stem}-{image_number:04}.md"
+
+
+def _checkpoint_path(job: Job) -> Path:
+    return OUTPUT_DIR / f".ocr-{job.job_id}.json"
+
+
+def _source_cache_path(job: Job, file_path: Path) -> Path:
+    source_directory = OUTPUT_DIR / ".ocr-sources"
+    return source_directory / f"{job.job_id}{file_path.suffix}"
+
+
+def _write_checkpoint(
+    job: Job,
+    source_path: Path,
+    total_pages: int,
+    completed_pages: int,
+) -> None:
+    checkpoint = _checkpoint_path(job)
+    checkpoint.parent.mkdir(parents=True, exist_ok=True)
+    checkpoint.write_text(
+        json.dumps(
+            {
+                "source_path": str(source_path),
+                "total_pages": total_pages,
+                "completed_pages": completed_pages,
+            }
+        ),
+        encoding="utf-8",
+    )
 
 
 def _safe_extract_images(archive: Path, target: Path) -> list[Path]:
@@ -67,13 +97,20 @@ async def process_ocr(
     """Render an upload, process each page, and publish progress on the job."""
     logger.info(f"[OCR] Starting OCR processing for job {job.job_id}")
     temporary = Path(tempfile.mkdtemp(prefix=f"daily-utils-{job.job_id}-"))
+    checkpoint = _checkpoint_path(job)
+    source_cache = _source_cache_path(job, file_path)
+    source_cache.parent.mkdir(parents=True, exist_ok=True)
     try:
-        image_paths = _image_paths(file_path, temporary)
+        if not source_cache.exists():
+            shutil.copyfile(file_path, source_cache)
+        image_paths = _image_paths(source_cache, temporary)
         if not image_paths:
             raise ValueError("No supported images found in the uploaded archive")
         logger.info(f"[OCR] Job {job.job_id}: extracted {len(image_paths)} images")
         with job.lock:
             job.total_pages = len(image_paths)
+            job.pages = []
+            job.pages_completed = 0
             job.status = "processing"
             job.message = f"Processing {len(image_paths)} page(s)"
         for page_number, image_path in enumerate(image_paths, start=1):
@@ -83,11 +120,16 @@ async def process_ocr(
                         f"[OCR] Job {job.job_id} was cancelled, returning early"
                     )
                     return
-            logger.debug(f"[OCR] Job {job.job_id}: processing page {page_number}")
-            markdown = await ocr(image_path)
             output_path = _markdown_path(job, page_number)
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-            output_path.write_text(markdown, encoding="utf-8")
+            if output_path.is_file():
+                # Preserve the existing page result cache and avoid paying for
+                # OCR again when a previous attempt stopped part-way through.
+                markdown = output_path.read_text(encoding="utf-8")
+            else:
+                logger.debug(f"[OCR] Job {job.job_id}: processing page {page_number}")
+                markdown = await ocr(image_path)
+                output_path.parent.mkdir(parents=True, exist_ok=True)
+                output_path.write_text(markdown, encoding="utf-8")
             with job.lock:
                 job.pages.append(markdown)
                 job.pages_completed = page_number
@@ -95,11 +137,14 @@ async def process_ocr(
                 job.message = (
                     f"Processed page {job.pages_completed} of {job.total_pages}"
                 )
+            _write_checkpoint(job, source_cache, len(image_paths), page_number)
         logger.info(f"[OCR] Job {job.job_id}: OCR processing completed successfully")
         with job.lock:
             job.status = "completed"
             job.progress = 100
             job.message = "Processing complete"
+        checkpoint.unlink(missing_ok=True)
+        source_cache.unlink(missing_ok=True)
     except Exception as exception:
         logger.exception(f"[OCR] Job {job.job_id}: OCR processing failed")
         with job.lock:
