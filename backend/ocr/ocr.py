@@ -15,6 +15,7 @@ from backend.jobs import Job
 
 logger = logging.getLogger(__name__)
 PROCESSOR_NAME = "ocr"
+MAXIMUM_PAGE_ATTEMPTS = 3
 
 
 def _markdown_path(job: Job, image_number: int) -> Path:
@@ -50,6 +51,28 @@ def _write_checkpoint(
         ),
         encoding="utf-8",
     )
+
+
+async def _ocr_page_with_retries(
+    image_path: Path,
+    ocr: Callable[[Path], Awaitable[str]],
+    maximum_attempts: int = MAXIMUM_PAGE_ATTEMPTS,
+) -> str:
+    """Retry transient OCR failures before allowing a page to be skipped."""
+    for attempt_number in range(1, maximum_attempts + 1):
+        try:
+            return await ocr(image_path)
+        except Exception:
+            if attempt_number == maximum_attempts:
+                raise
+            logger.warning(
+                "OCR failed for %s on attempt %s/%s; retrying",
+                image_path,
+                attempt_number,
+                maximum_attempts,
+            )
+
+    raise RuntimeError("OCR page attempts were exhausted")
 
 
 def _safe_extract_images(archive: Path, target: Path) -> list[Path]:
@@ -113,6 +136,7 @@ async def process_ocr(
             job.pages_completed = 0
             job.status = "processing"
             job.message = f"Processing {len(image_paths)} page(s)"
+        page_errors: list[str] = []
         for page_number, image_path in enumerate(image_paths, start=1):
             with job.lock:
                 if job.cancelled:
@@ -127,9 +151,17 @@ async def process_ocr(
                 markdown = output_path.read_text(encoding="utf-8")
             else:
                 logger.debug(f"[OCR] Job {job.job_id}: processing page {page_number}")
-                markdown = await ocr(image_path)
-                output_path.parent.mkdir(parents=True, exist_ok=True)
-                output_path.write_text(markdown, encoding="utf-8")
+                try:
+                    markdown = await _ocr_page_with_retries(image_path, ocr)
+                    output_path.parent.mkdir(parents=True, exist_ok=True)
+                    output_path.write_text(markdown, encoding="utf-8")
+                except Exception as exception:
+                    error_message = str(exception) or exception.__class__.__name__
+                    page_errors.append(f"Page {page_number}: {error_message}")
+                    logger.exception(
+                        f"[OCR] Job {job.job_id}: page {page_number} failed"
+                    )
+                    markdown = f"[OCR failed for page {page_number}: {error_message}]"
             with job.lock:
                 job.pages.append(markdown)
                 job.pages_completed = page_number
@@ -138,11 +170,17 @@ async def process_ocr(
                     f"Processed page {job.pages_completed} of {job.total_pages}"
                 )
             _write_checkpoint(job, source_cache, len(image_paths), page_number)
-        logger.info(f"[OCR] Job {job.job_id}: OCR processing completed successfully")
+        logger.info(f"[OCR] Job {job.job_id}: OCR processing completed")
         with job.lock:
             job.status = "completed"
             job.progress = 100
-            job.message = "Processing complete"
+            if page_errors:
+                job.message = (
+                    f"Processing complete with {len(page_errors)} page error(s)"
+                )
+                job.error = "; ".join(page_errors)
+            else:
+                job.message = "Processing complete"
         checkpoint.unlink(missing_ok=True)
         source_cache.unlink(missing_ok=True)
     except Exception as exception:

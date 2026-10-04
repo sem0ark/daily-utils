@@ -143,12 +143,20 @@ class MLXEngine:
                             "type": "text",
                             "text": "<|grounding|>Convert the document to markdown.",
                         },
-                        {"type": "image_url", "image_url": {"url": image_url}},
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": image_url, "detail": "high"},
+                        },
                     ],
                 }
             ],
             max_tokens=4096,
             temperature=0.0,
+            extra_body={
+                "repetition_penalty": 1.25,
+                "repetition_context_size": 64,
+                "no_repeat_ngram_size": 7,
+            },
         )
         return response.choices[0].message.content or ""
 
