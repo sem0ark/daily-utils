@@ -112,7 +112,10 @@ export function useLocalJob(
       if (resultMode === "file") {
         const artifacts = await localApi.getArtifacts(job.job_id);
         for (const artifact of artifacts.files) {
-          const blob = await localApi.getArtifact(job.job_id, artifact.file_name);
+          const blob = await localApi.getArtifact(
+            job.job_id,
+            artifact.file_name,
+          );
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = url;
