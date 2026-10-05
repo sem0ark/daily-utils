@@ -8,6 +8,7 @@ import {
   PresentationChartBarIcon,
   SpeakerWaveIcon,
   CpuChipIcon,
+  MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 
 import { Home } from "./Home";
@@ -47,6 +48,12 @@ const LocalOCR = lazy(() =>
 const LocalPDFToImages = lazy(() =>
   import("./local-processing/LocalPDFToImages").then((m) => ({
     default: m.LocalPDFToImages,
+  })),
+);
+
+const ChatSearch = lazy(() =>
+  import("./chat-search/ChatSearch").then((m) => ({
+    default: m.ChatSearch,
   })),
 );
 
@@ -162,6 +169,16 @@ export const NAVIGATION_CONFIG: NavItem[] = [
     tags: ["local", "pdf", "png", "zip", "images", "convert"],
     icon: DocumentTextIcon,
     element: lazyLoad(LocalPDFToImages),
+    showInHome: true,
+    showInCommandMenu: true,
+  },
+  {
+    name: "Chat Search",
+    path: "/chat-search",
+    description: "Search exported AI chat conversations locally.",
+    tags: ["chat", "search", "history", "json", "offline", "local"],
+    icon: MagnifyingGlassIcon,
+    element: lazyLoad(ChatSearch),
     showInHome: true,
     showInCommandMenu: true,
   },
