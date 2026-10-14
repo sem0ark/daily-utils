@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { parseJson3, parseSrt, parseTranscript } from "./transcriptParser";
+import {
+  parseJson3,
+  parseOfficeTranscript,
+  parseSrt,
+  parseTranscript,
+} from "./transcriptParser";
 import { formatAsText, segmentTranscript } from "./transcriptionFormatter";
 
 describe("transcript parser", () => {
@@ -30,6 +35,63 @@ describe("transcript parser", () => {
     );
   });
 
+  it("parses the Office transcript schema using text and startOffset", () => {
+    const input = JSON.stringify({
+      $schema: "http://stream.office.com/schemas/transcript.json",
+      version: "1.0.0",
+      type: "Transcript",
+      entries: [
+        {
+          text: "Please review the attached document.",
+          startOffset: "00:00:03.0975475",
+          endOffset: "00:00:04.7375475",
+          speakerDisplayName: "Alex Johnson",
+        },
+        {
+          text: "I will check it before the next meeting.",
+          startOffset: "00:00:04.7375475",
+          speakerDisplayName: "Morgan Lee",
+        },
+      ],
+    });
+
+    const parsed = parseTranscript(input);
+
+    expect(parsed.format).toBe("office");
+    expect(parsed.data.events?.[0]).toEqual(
+      expect.objectContaining({
+        tStartMs: 3097.5475,
+        segs: [
+          { utf8: "Alex Johnson> Please" },
+          { utf8: " review" },
+          { utf8: " the" },
+          { utf8: " attached" },
+          { utf8: " document." },
+        ],
+      }),
+    );
+    expect(parsed.data.events?.[1]?.segs?.[0]).toEqual({
+      utf8: "Morgan Lee> I",
+    });
+
+    expect(formatAsText(segmentTranscript(parsed.data))).toBe(
+      "Alex Johnson> Please review the attached document. Morgan Lee> I will check it before the next meeting.",
+    );
+  });
+
+  it("requires text and startOffset in Office transcript entries", () => {
+    expect(() =>
+      parseOfficeTranscript(
+        JSON.stringify({
+          $schema: "http://stream.office.com/schemas/transcript.json",
+          version: "1.0.0",
+          type: "Transcript",
+          entries: [{ text: "Missing offset" }],
+        }),
+      ),
+    ).toThrow("text and startOffset");
+  });
+
   it("formats SRT data through the existing segmentation pipeline", () => {
     const result = segmentTranscript(
       parseSrt(
@@ -42,5 +104,17 @@ describe("transcript parser", () => {
 
   it("rejects JSON that is not JSON3", () => {
     expect(() => parseJson3('{"events":[]}')).toThrow("valid JSON3");
+  });
+
+  it("does not default unsupported JSON to JSON3", () => {
+    expect(() => parseTranscript('{"events":[]}')).toThrow(
+      "supported transcript format",
+    );
+  });
+
+  it("does not default unsupported text to SRT", () => {
+    expect(() => parseTranscript("This is not a transcript.")).toThrow(
+      "supported transcript format",
+    );
   });
 });

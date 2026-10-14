@@ -1,6 +1,6 @@
 import type { TranscriptData, TranscriptEvent } from "./transcriptionFormatter";
 
-export type TranscriptFormat = "json3" | "srt";
+export type TranscriptFormat = "json3" | "office" | "srt";
 
 export interface ParsedTranscript {
   format: TranscriptFormat;
@@ -10,6 +10,8 @@ export interface ParsedTranscript {
 const SRT_TIMECODE =
   /^(\d{2}):(\d{2}):(\d{2})[,.](\d{3})\s+-->\s+(\d{2}):(\d{2}):(\d{2})[,.](\d{3})(?:\s+.*)?$/;
 const SRT_TIMESTAMP = /^(\d{2}):(\d{2}):(\d{2})[,.](\d{3})$/;
+const OFFICE_TIMESTAMP = /^(\d+):(\d{2}):(\d{2})(?:\.(\d+))?$/;
+const OFFICE_SCHEMA = "http://stream.office.com/schemas/transcript.json";
 
 function timestampToMilliseconds(value: string): number {
   const match = value.match(SRT_TIMESTAMP);
@@ -21,6 +23,19 @@ function timestampToMilliseconds(value: string): number {
     Number(startMinutes) * 60_000 +
     Number(startSeconds) * 1_000 +
     Number(startMilliseconds)
+  );
+}
+
+function officeTimestampToMilliseconds(value: string): number {
+  const match = value.match(OFFICE_TIMESTAMP);
+  if (!match) throw new Error(`Invalid Office transcript offset: ${value}`);
+
+  const [, hours, minutes, seconds, fraction = ""] = match;
+  return (
+    Number(hours) * 3_600_000 +
+    Number(minutes) * 60_000 +
+    Number(seconds) * 1_000 +
+    (fraction ? Number(`0.${fraction}`) * 1_000 : 0)
   );
 }
 
@@ -48,6 +63,37 @@ function isJson3Data(value: unknown): value is TranscriptData {
   if (!value || typeof value !== "object") return false;
   const data = value as { wireMagic?: unknown; events?: unknown };
   return data.wireMagic === "pb3" && Array.isArray(data.events);
+}
+
+function isOfficeTranscript(value: unknown): value is {
+  entries: {
+    text?: unknown;
+    startOffset?: unknown;
+    speakerDisplayName?: unknown;
+  }[];
+} {
+  if (!value || typeof value !== "object") return false;
+  const data = value as {
+    $schema?: unknown;
+    version?: unknown;
+    type?: unknown;
+    entries?: unknown;
+  };
+  return (
+    data.$schema === OFFICE_SCHEMA &&
+    data.version === "1.0.0" &&
+    data.type === "Transcript" &&
+    Array.isArray(data.entries)
+  );
+}
+
+function isSrt(input: string): boolean {
+  try {
+    parseSrt(input);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function parseJson3(input: string): TranscriptData {
@@ -78,6 +124,46 @@ export function parseJson3(input: string): TranscriptData {
           typeof segment.tOffsetMs === "number" ? segment.tOffsetMs : undefined,
       })),
     })),
+  };
+}
+
+export function parseOfficeTranscript(input: string): TranscriptData {
+  let value: unknown;
+  try {
+    value = JSON.parse(input.replace(/^\uFEFF/, ""));
+  } catch {
+    throw new Error("Input is not valid Office transcript JSON");
+  }
+
+  if (!isOfficeTranscript(value)) {
+    throw new Error("JSON input is not a valid Office transcript");
+  }
+
+  return {
+    events: value.entries.map((entry) => {
+      if (
+        typeof entry.text !== "string" ||
+        typeof entry.startOffset !== "string"
+      ) {
+        throw new Error(
+          "Office transcript entries require text and startOffset",
+        );
+      }
+
+      const text = entry.text.trim();
+      const speaker =
+        typeof entry.speakerDisplayName === "string"
+          ? entry.speakerDisplayName.trim()
+          : "";
+      return {
+        tStartMs: officeTimestampToMilliseconds(entry.startOffset),
+        segs: text
+          ? text.split(/\s+/).map((utf8, segmentIndex) => ({
+              utf8: `${segmentIndex === 0 ? `${speaker ? `${speaker}> ` : ""}` : " "}${utf8}`,
+            }))
+          : [],
+      };
+    }),
   };
 }
 
@@ -131,8 +217,26 @@ export function parseTranscript(input: string): ParsedTranscript {
   if (!trimmed) throw new Error("Transcript input is empty");
 
   if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
-    return { format: "json3", data: parseJson3(trimmed) };
+    let value: unknown;
+    try {
+      value = JSON.parse(trimmed);
+    } catch {
+      throw new Error("Input is not valid JSON3 or SRT");
+    }
+
+    if (isOfficeTranscript(value)) {
+      return { format: "office", data: parseOfficeTranscript(trimmed) };
+    }
+    if (isJson3Data(value)) {
+      return { format: "json3", data: parseJson3(trimmed) };
+    }
+
+    throw new Error("JSON input is not a supported transcript format");
   }
 
-  return { format: "srt", data: parseSrt(trimmed) };
+  if (isSrt(trimmed)) {
+    return { format: "srt", data: parseSrt(trimmed) };
+  }
+
+  throw new Error("Input is not a supported transcript format");
 }
