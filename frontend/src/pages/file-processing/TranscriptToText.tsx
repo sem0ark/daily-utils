@@ -316,7 +316,7 @@ const TranscriptInput = ({
           </pre>
         ) : (
           <p className="text-neutral-500">
-            Paste or import a JSON3 or SRT transcript to preview the formatting.
+            Paste or import a transcript to preview the formatting.
           </p>
         )}
       </div>
