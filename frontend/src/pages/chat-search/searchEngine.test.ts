@@ -2,11 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ChatSearchEngine } from "./searchEngine";
 import type { Conversation } from "./types";
 
-const conversation = (
-  id: string,
-  name: string,
-  content: string,
-): Conversation => ({
+const conversation = (id: string, name: string, content: string): Conversation => ({
   id,
   name,
   messages: [{ role: "user", content }],
@@ -21,9 +17,7 @@ describe("ChatSearchEngine", () => {
       conversation("two", "Second", "the chat has a warning in it"),
     ]);
 
-    expect(engine.search("the error").results.map(({ id }) => id)).toEqual([
-      "one",
-    ]);
+    expect(engine.search("the error").results.map(({ id }) => id)).toEqual(["one"]);
   });
 
   it("falls back to broader matches only when AND has no result", () => {
@@ -50,9 +44,7 @@ describe("ChatSearchEngine", () => {
 
   it("returns a short plain-text snippet", () => {
     const engine = new ChatSearchEngine();
-    engine.initialize([
-      conversation("one", "First", `${"before ".repeat(30)}needle after`),
-    ]);
+    engine.initialize([conversation("one", "First", `${"before ".repeat(30)}needle after`)]);
 
     const result = engine.search("needle").results[0];
     expect(result?.snippet).toContain("needle");
@@ -61,9 +53,7 @@ describe("ChatSearchEngine", () => {
 
   it("uses fuzzy and prefix matching for message content", () => {
     const engine = new ChatSearchEngine();
-    engine.initialize([
-      conversation("one", "First", "investigating authentication"),
-    ]);
+    engine.initialize([conversation("one", "First", "investigating authentication")]);
 
     expect(engine.search("auth").results[0]?.id).toBe("one");
     expect(engine.search("authentcation").results[0]?.id).toBe("one");
@@ -72,9 +62,7 @@ describe("ChatSearchEngine", () => {
   it("caps the number of returned results", () => {
     const engine = new ChatSearchEngine();
     engine.initialize(
-      Array.from({ length: 60 }, (_, index) =>
-        conversation(String(index), `Chat ${index}`, "shared searchable term"),
-      ),
+      Array.from({ length: 60 }, (_, index) => conversation(String(index), `Chat ${index}`, "shared searchable term")),
     );
 
     expect(engine.search("shared searchable term").results).toHaveLength(50);

@@ -1,10 +1,7 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { CopyToClipboard } from "../../common/components/buttons";
 import { formatAsText, segmentTranscript } from "./transcriptionFormatter";
-import type {
-  TranscriptData,
-  SegmentationOptions,
-} from "./transcriptionFormatter";
+import type { TranscriptData, SegmentationOptions } from "./transcriptionFormatter";
 import { parseTranscript } from "./transcriptParser";
 import type { ParsedTranscript } from "./transcriptParser";
 
@@ -41,10 +38,7 @@ const parseInput = async (input: string): Promise<ParsedTranscript> => {
   return parsed;
 };
 
-const formatInput = (
-  transcriptData: TranscriptData,
-  options: SegmentationOptions = {},
-): string => {
+const formatInput = (transcriptData: TranscriptData, options: SegmentationOptions = {}): string => {
   const result = segmentTranscript(transcriptData, options);
   console.log("[TranscriptToText] Transcript segmented successfully", {
     paragraphs: result.paragraphs.length,
@@ -76,15 +70,11 @@ interface TranscriptInputProps {
   isLoading?: boolean;
 }
 
-const TranscriptInput = ({
-  onProcess,
-  isLoading = false,
-}: TranscriptInputProps) => {
+const TranscriptInput = ({ onProcess, isLoading = false }: TranscriptInputProps) => {
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [parsedTranscript, setParsedTranscript] =
-    useState<ParsedTranscript | null>(null);
+  const [parsedTranscript, setParsedTranscript] = useState<ParsedTranscript | null>(null);
   const [previewError, setPreviewError] = useState(false);
   const [sentenceThreshold, setSentenceThreshold] = useState(6);
   const [paragraphBandwidthScale, setParagraphBandwidthScale] = useState(1.5);
@@ -179,11 +169,7 @@ const TranscriptInput = ({
       setError("Please enter JSON3, SRT, or a URL");
       throw new Error("Empty input");
     }
-    const res = await onProcess(
-      input,
-      formatOptions,
-      parsedTranscript ?? undefined,
-    );
+    const res = await onProcess(input, formatOptions, parsedTranscript ?? undefined);
     if (!res.success) {
       setError(res.error || "Failed to process input");
       throw new Error(res.error || "Failed to process input");
@@ -197,9 +183,7 @@ const TranscriptInput = ({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={`relative min-h-32 rounded-xl border-2 transition-all ${
-        isDragging
-          ? "border-blue-500 bg-blue-50"
-          : "border-neutral-500 bg-white"
+        isDragging ? "border-blue-500 bg-blue-50" : "border-neutral-500 bg-white"
       } p-2`}
     >
       <input
@@ -218,9 +202,7 @@ const TranscriptInput = ({
       {isDragging && (
         <div className="bg-opacity-10 absolute inset-0 flex items-center justify-center rounded-xl bg-blue-500 backdrop-blur-sm">
           <div className="text-center">
-            <p className="text-lg font-semibold text-blue-600">
-              Drop JSON3 or SRT file here
-            </p>
+            <p className="text-lg font-semibold text-blue-600">Drop JSON3 or SRT file here</p>
           </div>
         </div>
       )}
@@ -229,13 +211,8 @@ const TranscriptInput = ({
         <div className="flex w-full flex-col gap-2">
           {input.length > 50000 ? (
             <div className="flex h-36 w-full flex-col items-center justify-center rounded-lg border-2 border-neutral-200 bg-neutral-50 p-4">
-              <p className="font-semibold text-neutral-600">
-                Large file loaded ({Math.round(input.length / 1024)} KB)
-              </p>
-              <button
-                onClick={() => setInput("")}
-                className="mt-2 text-blue-500 hover:underline"
-              >
+              <p className="font-semibold text-neutral-600">Large file loaded ({Math.round(input.length / 1024)} KB)</p>
+              <button onClick={() => setInput("")} className="mt-2 text-blue-500 hover:underline">
                 Clear input
               </button>
             </div>
@@ -248,11 +225,7 @@ const TranscriptInput = ({
               placeholder="Paste JSON3 or SRT transcript or URL here... (or drag & drop a file)"
             />
           )}
-          {error && (
-            <div className="rounded-lg border-2 border-red-500 bg-red-100 p-2 text-red-700">
-              {error}
-            </div>
-          )}
+          {error && <div className="rounded-lg border-2 border-red-500 bg-red-100 p-2 text-red-700">{error}</div>}
         </div>
 
         <CopyToClipboard getText={handeGetText} bigger disabled={isLoading} />
@@ -275,9 +248,7 @@ const TranscriptInput = ({
             aria-label="Sentence splitting threshold"
             className="accent-blue-500"
           />
-          <span className="text-neutral-500">
-            Lower values create more sentence breaks.
-          </span>
+          <span className="text-neutral-500">Lower values create more sentence breaks.</span>
         </label>
         <label className="flex flex-col gap-1 text-neutral-700">
           <span className="flex justify-between font-semibold">
@@ -295,9 +266,7 @@ const TranscriptInput = ({
             aria-label="Paragraph splitting bandwidth"
             className="accent-blue-500"
           />
-          <span className="text-neutral-500">
-            Lower values create more paragraph breaks.
-          </span>
+          <span className="text-neutral-500">Lower values create more paragraph breaks.</span>
         </label>
       </div>
 
@@ -307,17 +276,11 @@ const TranscriptInput = ({
           <span className="text-neutral-500">First 1,000 words</span>
         </div>
         {previewError ? (
-          <p className="text-neutral-500">
-            Preview unavailable until the input is valid JSON3 or SRT.
-          </p>
+          <p className="text-neutral-500">Preview unavailable until the input is valid JSON3 or SRT.</p>
         ) : preview ? (
-          <pre className="max-h-96 overflow-auto font-mono whitespace-pre-wrap text-neutral-800">
-            {preview}
-          </pre>
+          <pre className="max-h-96 overflow-auto font-mono whitespace-pre-wrap text-neutral-800">{preview}</pre>
         ) : (
-          <p className="text-neutral-500">
-            Paste or import a transcript to preview the formatting.
-          </p>
+          <p className="text-neutral-500">Paste or import a transcript to preview the formatting.</p>
         )}
       </div>
     </div>
@@ -340,8 +303,7 @@ export function TranscriptToText() {
         console.log("[TranscriptToText] Process succeeded");
         return { success: true, data: formatted };
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Failed to process";
+        const message = error instanceof Error ? error.message : "Failed to process";
         console.error("[TranscriptToText] Process failed:", message);
         return { success: false, error: message };
       } finally {
@@ -353,9 +315,7 @@ export function TranscriptToText() {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <h1 className="mb-8 text-center text-3xl font-bold">
-        Transcript to Text
-      </h1>
+      <h1 className="mb-8 text-center text-3xl font-bold">Transcript to Text</h1>
 
       <div className="my-5 flex flex-col gap-4">
         <TranscriptInput onProcess={handleProcess} isLoading={isLoading} />

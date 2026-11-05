@@ -6,13 +6,15 @@ ifneq (,$(findstring ocr,$(API_PROCESSORS)))
 API_UV_GROUP := --group mlx
 endif
 
-.PHONY: front-install front-dev front-build front-format api-format format test api-dev api-install
+.PHONY: front-install front-dev frontend-dev front-build front-format api-format format test api-dev api-install
 
 front-install:
 	cd $(FRONTEND_DIR) && pnpm install --frozen-lockfile
 
 front-dev:
 	cd $(FRONTEND_DIR) && pnpm run dev
+
+frontend-dev: front-dev
 
 front-build:
 	cd $(FRONTEND_DIR) && pnpm run build

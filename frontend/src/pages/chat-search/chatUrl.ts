@@ -1,8 +1,7 @@
 export const DEFAULT_CHAT_BASE_URL = "";
 export const CHAT_BASE_URL_STORAGE_KEY = "daily-utils.chat-base-url";
 
-const normalizeBaseUrl = (baseUrl: string) =>
-  `${baseUrl.trim().replace(/\/+$/, "")}/`;
+const normalizeBaseUrl = (baseUrl: string) => `${baseUrl.trim().replace(/\/+$/, "")}/`;
 
 export const chatUrl = (baseUrl: string, id: string) => {
   const marker = "conversations/";

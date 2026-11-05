@@ -2,11 +2,7 @@ import { Link } from "wouter";
 
 import { PropsWithChildren } from "react";
 
-export const Card = ({
-  name,
-  path,
-  children,
-}: PropsWithChildren<{ name: string; path: string }>) => (
+export const Card = ({ name, path, children }: PropsWithChildren<{ name: string; path: string }>) => (
   <Link
     href={path}
     title={"Go to " + name}

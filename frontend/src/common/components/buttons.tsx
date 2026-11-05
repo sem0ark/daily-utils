@@ -47,8 +47,7 @@ export function CopyToClipboard({
 
       if (isCmdC) {
         // Only intercept if no text is manually selected.
-        const hasSelection =
-          (window.getSelection()?.toString().length ?? 0) > 0;
+        const hasSelection = (window.getSelection()?.toString().length ?? 0) > 0;
         if (!hasSelection) {
           e.preventDefault();
           copy();

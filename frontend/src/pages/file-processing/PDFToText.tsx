@@ -15,10 +15,7 @@ import {
 import pdfWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
-const processMessage = async (
-  { arrayBuffer }: WorkerInput,
-  onMessage: (message: WorkerMessage) => void,
-) => {
+const processMessage = async ({ arrayBuffer }: WorkerInput, onMessage: (message: WorkerMessage) => void) => {
   try {
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     const numPages = pdf.numPages;
@@ -48,8 +45,7 @@ const processMessage = async (
             lowerFont.includes("bold") ||
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ((style as any)?.fontWeight && (style as any).fontWeight > 500);
-          const isItalic =
-            lowerFont.includes("italic") || lowerFont.includes("oblique");
+          const isItalic = lowerFont.includes("italic") || lowerFont.includes("oblique");
 
           return {
             text: cleanText,
@@ -68,9 +64,7 @@ const processMessage = async (
           };
         });
 
-      items.sort((a, b) =>
-        b.rowBucket !== a.rowBucket ? b.rowBucket - a.rowBucket : a.x - b.x,
-      );
+      items.sort((a, b) => (b.rowBucket !== a.rowBucket ? b.rowBucket - a.rowBucket : a.x - b.x));
       results[pageNum - 1] = { pageNumber: pageNum, items };
 
       completedPages++;
@@ -111,9 +105,7 @@ const processMessage = async (
 const FILE_TYPES = ["application/pdf"];
 
 export function PDFToText() {
-  const [status, setStatus] = useState<
-    "idle" | "processing" | "done" | "error"
-  >("idle");
+  const [status, setStatus] = useState<"idle" | "processing" | "done" | "error">("idle");
   const [progress, setProgress] = useState({ done: 0, total: 0, percent: 0 });
   const [result, setResult] = useState("");
 
@@ -161,9 +153,7 @@ export function PDFToText() {
         <FileUpload
           onFileUpload={handleFileUpload}
           allowedFileTypes={FILE_TYPES}
-          className={clsx(
-            status === "processing" && "pointer-events-none opacity-50",
-          )}
+          className={clsx(status === "processing" && "pointer-events-none opacity-50")}
         />
 
         {status === "processing" && (
@@ -187,10 +177,7 @@ export function PDFToText() {
           <div className="group animate-in fade-in slide-in-from-bottom-4 relative">
             <div className="flex items-center justify-between rounded-t-lg border-2 border-b-0 border-neutral-500 bg-neutral-100 px-4 py-2">
               <span className="text-sm font-bold">Markdown Output</span>
-              <CopyToClipboard
-                getText={copyToClipboard}
-                disabled={status !== "done"}
-              />
+              <CopyToClipboard getText={copyToClipboard} disabled={status !== "done"} />
             </div>
 
             <textarea

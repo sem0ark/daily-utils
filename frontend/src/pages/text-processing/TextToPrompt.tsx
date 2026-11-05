@@ -1,12 +1,4 @@
-import {
-  useRef,
-  ChangeEvent,
-  DragEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useRef, ChangeEvent, DragEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { CopyTextEntryDirect } from "../../common/components/copyTextEntry";
 import {
   escapeDollar,
@@ -19,18 +11,9 @@ import {
 } from "./textProcessing";
 import { TrashIcon, CloudArrowUpIcon } from "@heroicons/react/24/solid";
 
-const onPaste = joinFunctions(
-  replaceUnicode,
-  escapeGenerics,
-  trimLines,
-  escapeDollar,
-  escapeNewLine,
-);
+const onPaste = joinFunctions(replaceUnicode, escapeGenerics, trimLines, escapeDollar, escapeNewLine);
 
-function populateTemplate(
-  text: string,
-  replacements: string[] | string = "",
-): string {
+function populateTemplate(text: string, replacements: string[] | string = ""): string {
   const emptyTripleQuotesRegex = /"""\n*"""/g;
   if (Array.isArray(replacements)) {
     let i = 0;
@@ -40,10 +23,7 @@ function populateTemplate(
       return `"""\n${val}\n"""`;
     });
   }
-  return text.replace(
-    emptyTripleQuotesRegex,
-    () => `"""\n${replacements}\n"""`,
-  );
+  return text.replace(emptyTripleQuotesRegex, () => `"""\n${replacements}\n"""`);
 }
 
 const mergeImportedTemplates = (existing: Template[], imported: Template[]) => {
@@ -266,9 +246,7 @@ const loadTemplates = (): Template[] => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) return DEFAULT_TEMPLATES;
     const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) && parsed.length > 0
-      ? parsed
-      : DEFAULT_TEMPLATES;
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_TEMPLATES;
   } catch (error) {
     console.error("Failed to parse templates from localStorage", error);
     return DEFAULT_TEMPLATES;
@@ -310,8 +288,7 @@ const TemplatesImportExport = ({
       try {
         const text = String(reader.result ?? "");
         const parsed: Record<string, string>[] = JSON.parse(text);
-        if (!Array.isArray(parsed))
-          throw new Error("Imported JSON must be an array");
+        if (!Array.isArray(parsed)) throw new Error("Imported JSON must be an array");
 
         const imported = parsed.map((p) => ({
           name: String(p.name ?? "Untitled"),
@@ -361,9 +338,7 @@ const TemplatesImportExport = ({
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         className={`group/drop flex flex-col gap-2 rounded-lg transition-all ${
-          isDragging
-            ? "border-blue-500 bg-blue-50"
-            : "border-neutral-200 bg-neutral-50"
+          isDragging ? "border-blue-500 bg-blue-50" : "border-neutral-200 bg-neutral-50"
         }`}
       >
         <div
@@ -384,13 +359,7 @@ const TemplatesImportExport = ({
             Export JSON
           </button>
           <label className="flex-1 cursor-pointer rounded border border-neutral-300 bg-white py-1 text-center text-xs font-semibold text-neutral-600 hover:bg-neutral-50">
-            <input
-              ref={fileRef}
-              onChange={onChange}
-              type="file"
-              accept="application/json"
-              className="hidden"
-            />
+            <input ref={fileRef} onChange={onChange} type="file" accept="application/json" className="hidden" />
             Import JSON
           </label>
         </div>
@@ -458,8 +427,7 @@ const PromptEditor = ({
                     defaultValue={t.name}
                     onBlur={(e) => handleNameSubmit(idx, e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter")
-                        handleNameSubmit(idx, e.currentTarget.value);
+                      if (e.key === "Enter") handleNameSubmit(idx, e.currentTarget.value);
                       if (e.key === "Escape") setEditingNameIndex(null);
                     }}
                   />
@@ -470,13 +438,10 @@ const PromptEditor = ({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (confirm(`Delete template "${t.name}"?`))
-                        onRemove(idx);
+                      if (confirm(`Delete template "${t.name}"?`)) onRemove(idx);
                     }}
                     className={`text-red-300 transition-all hover:text-red-500 ${
-                      selectedIndex === idx
-                        ? "w-auto scale-100 p-2 opacity-100"
-                        : "w-0 scale-0 opacity-0"
+                      selectedIndex === idx ? "w-auto scale-100 p-2 opacity-100" : "w-0 scale-0 opacity-0"
                     }`}
                     title="Delete template"
                   >
@@ -519,14 +484,9 @@ const PromptEditor = ({
   );
 };
 
-const PromptFormattingForm = ({
-  templateContents,
-}: {
-  templateContents: string;
-}) => {
+const PromptFormattingForm = ({ templateContents }: { templateContents: string }) => {
   const { count, placeholders } = useMemo(() => {
-    const totalOccurrences = (templateContents.match(/"""\n*"""/g) || [])
-      .length;
+    const totalOccurrences = (templateContents.match(/"""\n*"""/g) || []).length;
 
     const matches = templateContents.matchAll(/(?:^|\n)(.*?)\n*"""\n*"""/g);
     const discoveredPlaceholders: string[] = [];
@@ -580,16 +540,13 @@ export function TextToPrompt() {
   const safeIndex = selectedIndex >= templates.length ? 0 : selectedIndex;
   const currentTemplate = templates[safeIndex] ?? DEFAULT_TEMPLATES[0];
 
-  const updateTemplate = useCallback(
-    (index: number, updates: Partial<Template>) => {
-      setTemplates((prev) => {
-        const next = [...prev];
-        next[index] = { ...next[index], ...updates };
-        return next;
-      });
-    },
-    [],
-  );
+  const updateTemplate = useCallback((index: number, updates: Partial<Template>) => {
+    setTemplates((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], ...updates };
+      return next;
+    });
+  }, []);
 
   const addNewTemplate = useCallback(() => {
     const newTemplate = {
@@ -625,9 +582,7 @@ export function TextToPrompt() {
         onUpdate={updateTemplate}
         onAdd={addNewTemplate}
         onRemove={removeTemplate}
-        onImport={(imported) =>
-          setTemplates((prev) => mergeImportedTemplates(prev, imported))
-        }
+        onImport={(imported) => setTemplates((prev) => mergeImportedTemplates(prev, imported))}
       />
       <PromptFormattingForm templateContents={currentTemplate.contents} />
     </div>

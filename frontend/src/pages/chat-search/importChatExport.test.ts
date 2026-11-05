@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  deduplicateConversations,
-  normalizeConversation,
-} from "./importChatExport";
+import { deduplicateConversations, normalizeConversation } from "./importChatExport";
 
 describe("chat export normalization", () => {
   it("rejects records without an id and supplies safe defaults", () => {

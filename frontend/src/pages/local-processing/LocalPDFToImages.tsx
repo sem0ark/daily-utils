@@ -14,19 +14,14 @@ export const LocalPDFToImages = () => (
 const LocalPDFToImagesContent = () => {
   const { isAvailable, processors } = useLocalServerDiscovery();
   const isEnabled = isAvailable && processors.includes("pdf-to-png-archive");
-  const { runJob, cancelJob, history, downloadJob } = useLocalJob(
-    "pdf-to-png-archive",
-    "file",
-  );
+  const { runJob, cancelJob, history, downloadJob } = useLocalJob("pdf-to-png-archive", "file");
 
   return (
     <div className="mx-auto max-w-4xl">
       <h1 className="mb-8 text-center text-3xl font-bold">Local PDF to PNGs</h1>
 
       <div className="flex flex-col gap-6">
-        <p className="text-neutral-600">
-          Render a PDF into a compressed ZIP archive of optimized PNG pages.
-        </p>
+        <p className="text-neutral-600">Render a PDF into a compressed ZIP archive of optimized PNG pages.</p>
         <LocalProcessorNotice processor="pdf-to-png-archive" />
 
         {isEnabled && (
@@ -42,8 +37,7 @@ const LocalPDFToImagesContent = () => {
           <LocalJobList
             jobs={history}
             onCancel={(job) => {
-              if (window.confirm("Are you sure you want to cancel this job?"))
-                void cancelJob(job.job_id);
+              if (window.confirm("Are you sure you want to cancel this job?")) void cancelJob(job.job_id);
             }}
             onDownload={(job) => void downloadJob(job)}
           />

@@ -1,17 +1,10 @@
 import { describe, expect, it } from "vitest";
-import {
-  parseJson3,
-  parseOfficeTranscript,
-  parseSrt,
-  parseTranscript,
-} from "./transcriptParser";
+import { parseJson3, parseOfficeTranscript, parseSrt, parseTranscript } from "./transcriptParser";
 import { formatAsText, segmentTranscript } from "./transcriptionFormatter";
 
 describe("transcript parser", () => {
   it("recognizes JSON3 by its root marker", () => {
-    const parsed = parseTranscript(
-      '{"wireMagic":"pb3","events":[{"tStartMs":10,"segs":[{"utf8":"Hello."}]}]}',
-    );
+    const parsed = parseTranscript('{"wireMagic":"pb3","events":[{"tStartMs":10,"segs":[{"utf8":"Hello."}]}]}');
 
     expect(parsed.format).toBe("json3");
     expect(parsed.data.events).toHaveLength(1);
@@ -30,9 +23,7 @@ describe("transcript parser", () => {
         tStartMs: 84100,
       }),
     ]);
-    expect(data.events?.[0].segs?.map((segment) => segment.utf8).join("")).toBe(
-      "<b>Hello!</b> Welcome to the video.",
-    );
+    expect(data.events?.[0].segs?.map((segment) => segment.utf8).join("")).toBe("<b>Hello!</b> Welcome to the video.");
   });
 
   it("parses the Office transcript schema using text and startOffset", () => {
@@ -94,9 +85,7 @@ describe("transcript parser", () => {
 
   it("formats SRT data through the existing segmentation pipeline", () => {
     const result = segmentTranscript(
-      parseSrt(
-        "1\n00:00:00,000 --> 00:00:01,000\nHello world.\n\n2\n00:00:02,000 --> 00:00:03,000\nThis is next.",
-      ),
+      parseSrt("1\n00:00:00,000 --> 00:00:01,000\nHello world.\n\n2\n00:00:02,000 --> 00:00:03,000\nThis is next."),
     );
 
     expect(formatAsText(result)).toBe("Hello world. This is next.");
@@ -107,14 +96,10 @@ describe("transcript parser", () => {
   });
 
   it("does not default unsupported JSON to JSON3", () => {
-    expect(() => parseTranscript('{"events":[]}')).toThrow(
-      "supported transcript format",
-    );
+    expect(() => parseTranscript('{"events":[]}')).toThrow("supported transcript format");
   });
 
   it("does not default unsupported text to SRT", () => {
-    expect(() => parseTranscript("This is not a transcript.")).toThrow(
-      "supported transcript format",
-    );
+    expect(() => parseTranscript("This is not a transcript.")).toThrow("supported transcript format");
   });
 });

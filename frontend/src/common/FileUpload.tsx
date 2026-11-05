@@ -2,10 +2,7 @@ import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { useState, useRef } from "react";
 
-const validateFile = (
-  file: File | null,
-  allowedFileTypes: string[],
-): boolean => {
+const validateFile = (file: File | null, allowedFileTypes: string[]): boolean => {
   if (!file) return false;
   if (
     allowedFileTypes.length > 0 &&
@@ -13,10 +10,8 @@ const validateFile = (
       (allowedType) =>
         allowedType === "*" ||
         allowedType === file.type ||
-        (allowedType.endsWith("/*") &&
-          file.type.startsWith(allowedType.slice(0, -1))) ||
-        (allowedType.startsWith(".") &&
-          file.name.toLowerCase().endsWith(allowedType.toLowerCase())),
+        (allowedType.endsWith("/*") && file.type.startsWith(allowedType.slice(0, -1))) ||
+        (allowedType.startsWith(".") && file.name.toLowerCase().endsWith(allowedType.toLowerCase())),
     )
   ) {
     return false;

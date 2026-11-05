@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  ExclamationTriangleIcon,
-  ArrowPathIcon,
-  QuestionMarkCircleIcon,
-} from "@heroicons/react/24/outline";
+import { ExclamationTriangleIcon, ArrowPathIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import { Link } from "wouter";
 
 const GeneralError = ({ onReload }: { onReload: () => void }) => (
@@ -12,9 +8,7 @@ const GeneralError = ({ onReload }: { onReload: () => void }) => (
       <ExclamationTriangleIcon className="size-12 text-red-500" />
     </div>
     <h1 className="text-2xl font-bold">Application Error</h1>
-    <p className="mt-2 max-w-md">
-      Something went wrong while loading this tool.
-    </p>
+    <p className="mt-2 max-w-md">Something went wrong while loading this tool.</p>
 
     <div className="mt-8 flex gap-4">
       <button
@@ -24,10 +18,7 @@ const GeneralError = ({ onReload }: { onReload: () => void }) => (
         <ArrowPathIcon className="size-4" />
         Reload App
       </button>
-      <Link
-        href="/"
-        className="rounded-lg border-2 border-neutral-200 px-4 py-2 hover:border-neutral-500"
-      >
+      <Link href="/" className="rounded-lg border-2 border-neutral-200 px-4 py-2 hover:border-neutral-500">
         Go Home
       </Link>
     </div>
@@ -51,10 +42,7 @@ export const NotFound = () => {
           <ArrowPathIcon className="size-4" />
           Reload App
         </button>
-        <Link
-          href="/"
-          className="rounded-lg border-2 border-neutral-200 px-4 py-2 hover:border-neutral-500"
-        >
+        <Link href="/" className="rounded-lg border-2 border-neutral-200 px-4 py-2 hover:border-neutral-500">
           Go Home
         </Link>
       </div>
@@ -64,10 +52,7 @@ export const NotFound = () => {
 
 type State = { error: Error | null };
 
-export class RouteErrorBoundary extends React.Component<
-  React.PropsWithChildren,
-  State
-> {
+export class RouteErrorBoundary extends React.Component<React.PropsWithChildren, State> {
   state: State = { error: null };
 
   static getDerivedStateFromError(error: Error) {
@@ -83,11 +68,7 @@ export class RouteErrorBoundary extends React.Component<
   render() {
     if (this.state.error) {
       const isNotFound = String(this.state.error.message).includes("404");
-      return isNotFound ? (
-        <NotFound />
-      ) : (
-        <GeneralError onReload={this.handleReload} />
-      );
+      return isNotFound ? <NotFound /> : <GeneralError onReload={this.handleReload} />;
     }
 
     return this.props.children ?? null;

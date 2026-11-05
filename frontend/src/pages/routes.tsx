@@ -27,6 +27,12 @@ const PDFToText = lazy(() =>
   })),
 );
 
+const PdfTextReplacer = lazy(() =>
+  import("./file-processing/PdfTextReplacer").then((m) => ({
+    default: m.PdfTextReplacer,
+  })),
+);
+
 const PPTXToText = lazy(() =>
   import("./file-processing/PPTXToText").then((m) => ({
     default: m.PPTXToText,
@@ -129,6 +135,16 @@ export const NAVIGATION_CONFIG: NavItem[] = [
     tags: ["file", "convert", "parse", "extraction", "document"],
     icon: DocumentTextIcon,
     element: lazyLoad(PDFToText),
+    showInHome: true,
+    showInCommandMenu: true,
+  },
+  {
+    name: "Replace PDF Text",
+    path: "/file-processing/replace-pdf-text",
+    description: "Search, select, and replace PDF text locally.",
+    tags: ["pdf", "replace", "edit", "search", "document"],
+    icon: DocumentTextIcon,
+    element: lazyLoad(PdfTextReplacer),
     showInHome: true,
     showInCommandMenu: true,
   },

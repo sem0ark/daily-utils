@@ -5,24 +5,13 @@ import type { Conversation } from "./types";
 const toThreadText = (conversation: Conversation) =>
   conversation.messages
     .map((message, index) => {
-      return [`[${index + 1}] ${message.role}`, message.content ?? ""]
-        .filter(Boolean)
-        .join("\n");
+      return [`[${index + 1}] ${message.role}`, message.content ?? ""].filter(Boolean).join("\n");
     })
     .join("\n\n");
 
-export function ConversationPreview({
-  conversation,
-  query,
-}: {
-  conversation: Conversation | null;
-  query: string;
-}) {
+export function ConversationPreview({ conversation, query }: { conversation: Conversation | null; query: string }) {
   const firstMatchRef = useRef<HTMLElement | null>(null);
-  const threadText = useMemo(
-    () => (conversation ? toThreadText(conversation) : ""),
-    [conversation],
-  );
+  const threadText = useMemo(() => (conversation ? toThreadText(conversation) : ""), [conversation]);
 
   useEffect(() => {
     firstMatchRef.current?.scrollIntoView({ block: "center" });
@@ -40,11 +29,7 @@ export function ConversationPreview({
     <section className="flex h-[65vh] min-w-0 flex-col rounded-lg border-2 border-neutral-200 bg-neutral-50 p-4">
       <div className="min-h-0 flex-1 overflow-auto rounded-lg border-2 border-neutral-500 bg-white p-4">
         <pre className="font-mono text-sm leading-6 break-words whitespace-pre-wrap text-neutral-800">
-          <HighlightedText
-            text={threadText}
-            query={query}
-            firstMatchRef={firstMatchRef}
-          />
+          <HighlightedText text={threadText} query={query} firstMatchRef={firstMatchRef} />
         </pre>
       </div>
     </section>

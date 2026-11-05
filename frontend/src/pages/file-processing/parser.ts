@@ -36,13 +36,8 @@ export const removeNonPrintableCharacters = (value: string) =>
       if (code === undefined) return false;
 
       const isAsciiControl =
-        (code <= 0x1f && code !== 0x09 && code !== 0x0a && code !== 0x0d) ||
-        (code >= 0x7f && code <= 0x9f);
-      const isZeroWidthOrBom =
-        code === 0x200b ||
-        code === 0x200c ||
-        code === 0x200d ||
-        code === 0xfeff;
+        (code <= 0x1f && code !== 0x09 && code !== 0x0a && code !== 0x0d) || (code >= 0x7f && code <= 0x9f);
+      const isZeroWidthOrBom = code === 0x200b || code === 0x200c || code === 0x200d || code === 0xfeff;
 
       return !isAsciiControl && !isZeroWidthOrBom;
     })
@@ -80,9 +75,7 @@ export class MarkdownExtractor {
     if (Object.keys(counts).length === 0) return;
 
     // 2. Identify Body Font Size (The dominant peak)
-    const sortedByFrequency = Object.entries(counts).sort(
-      (a, b) => b[1] - a[1],
-    );
+    const sortedByFrequency = Object.entries(counts).sort((a, b) => b[1] - a[1]);
     this.bodyFontSize = Number(sortedByFrequency[0][0]);
 
     // 3. Extract potential heading sizes (anything comfortably larger than body)
@@ -118,9 +111,7 @@ export class MarkdownExtractor {
    */
   private getHeadingLevel(fontSize: number): number {
     // Return 1 for H1, 2 for H2, etc.
-    const levelIndex = this.headingLevels.findIndex(
-      (hSize) => Math.abs(hSize - fontSize) <= 1.5,
-    );
+    const levelIndex = this.headingLevels.findIndex((hSize) => Math.abs(hSize - fontSize) <= 1.5);
     return levelIndex !== -1 ? levelIndex + 1 : 0;
   }
 
