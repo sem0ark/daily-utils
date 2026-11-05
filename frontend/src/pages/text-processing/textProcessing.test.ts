@@ -41,12 +41,7 @@ describe("escapeLeadingWhitespace", () => {
       "just text", // Should trim (0 space)
     ].join("\n");
 
-    const expected = [
-      "<pre>    </pre>long line",
-      "x",
-      "short",
-      "just text",
-    ].join("\n");
+    const expected = ["<pre>    </pre>long line", "x", "short", "just text"].join("\n");
 
     expect(escapeLeadingWhitespace(input)).toBe(expected);
   });

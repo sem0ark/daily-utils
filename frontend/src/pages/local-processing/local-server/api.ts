@@ -1,13 +1,6 @@
-import type {
-  JobResultResponse,
-  JobArtifactsResponse,
-  JobStatusResponse,
-  LocalServerHealthResponse,
-} from "./types";
+import type { JobResultResponse, JobArtifactsResponse, JobStatusResponse, LocalServerHealthResponse } from "./types";
 
-export const LOCAL_SERVER_URL = (
-  import.meta.env.VITE_LOCAL_SERVER_URL || "http://127.0.0.1:8888"
-).replace(/\/$/, "");
+export const LOCAL_SERVER_URL = (import.meta.env.VITE_LOCAL_SERVER_URL || "http://127.0.0.1:8888").replace(/\/$/, "");
 
 async function parseError(response: Response): Promise<never> {
   let detail = response.statusText;
@@ -21,9 +14,7 @@ async function parseError(response: Response): Promise<never> {
 }
 
 export const localApi = {
-  async getHealth(
-    signal?: AbortSignal,
-  ): Promise<LocalServerHealthResponse | null> {
+  async getHealth(signal?: AbortSignal): Promise<LocalServerHealthResponse | null> {
     try {
       const response = await fetch(`${LOCAL_SERVER_URL}/health`, { signal });
       if (!response.ok) return null;
@@ -33,11 +24,7 @@ export const localApi = {
     }
   },
 
-  async submitJob(
-    file: File,
-    processor: string,
-    signal?: AbortSignal,
-  ): Promise<string> {
+  async submitJob(file: File, processor: string, signal?: AbortSignal): Promise<string> {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("processor", processor);
@@ -53,10 +40,7 @@ export const localApi = {
     return data.job_id;
   },
 
-  async pollJob(
-    jobId: string,
-    signal?: AbortSignal,
-  ): Promise<JobStatusResponse> {
+  async pollJob(jobId: string, signal?: AbortSignal): Promise<JobStatusResponse> {
     const response = await fetch(`${LOCAL_SERVER_URL}/v1/jobs/${jobId}`, {
       signal,
     });
@@ -64,53 +48,33 @@ export const localApi = {
     return (await response.json()) as JobStatusResponse;
   },
 
-  async listJobs(
-    processor: string,
-    signal?: AbortSignal,
-  ): Promise<JobStatusResponse[]> {
-    const response = await fetch(
-      `${LOCAL_SERVER_URL}/v1/jobs?processor=${encodeURIComponent(processor)}`,
-      { signal },
-    );
+  async listJobs(processor: string, signal?: AbortSignal): Promise<JobStatusResponse[]> {
+    const response = await fetch(`${LOCAL_SERVER_URL}/v1/jobs?processor=${encodeURIComponent(processor)}`, { signal });
     if (!response.ok) await parseError(response);
     return (await response.json()) as JobStatusResponse[];
   },
 
   async getResult(jobId: string, signal?: AbortSignal): Promise<string[]> {
-    const response = await fetch(
-      `${LOCAL_SERVER_URL}/v1/jobs/${jobId}/result`,
-      {
-        signal,
-      },
-    );
+    const response = await fetch(`${LOCAL_SERVER_URL}/v1/jobs/${jobId}/result`, {
+      signal,
+    });
     if (!response.ok) await parseError(response);
     const data = (await response.json()) as JobResultResponse;
     return data.pages;
   },
 
-  async getArtifacts(
-    jobId: string,
-    signal?: AbortSignal,
-  ): Promise<JobArtifactsResponse> {
-    const response = await fetch(
-      `${LOCAL_SERVER_URL}/v1/jobs/${jobId}/result`,
-      {
-        signal,
-      },
-    );
+  async getArtifacts(jobId: string, signal?: AbortSignal): Promise<JobArtifactsResponse> {
+    const response = await fetch(`${LOCAL_SERVER_URL}/v1/jobs/${jobId}/result`, {
+      signal,
+    });
     if (!response.ok) await parseError(response);
     return (await response.json()) as JobArtifactsResponse;
   },
 
-  async getArtifact(
-    jobId: string,
-    fileName: string,
-    signal?: AbortSignal,
-  ): Promise<Blob> {
-    const response = await fetch(
-      `${LOCAL_SERVER_URL}/v1/jobs/${jobId}/result/${encodeURIComponent(fileName)}`,
-      { signal },
-    );
+  async getArtifact(jobId: string, fileName: string, signal?: AbortSignal): Promise<Blob> {
+    const response = await fetch(`${LOCAL_SERVER_URL}/v1/jobs/${jobId}/result/${encodeURIComponent(fileName)}`, {
+      signal,
+    });
     if (!response.ok) await parseError(response);
     return response.blob();
   },

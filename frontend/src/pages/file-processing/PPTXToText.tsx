@@ -13,10 +13,7 @@ import {
 
 import JSZip from "jszip";
 
-const processMessage = async (
-  { arrayBuffer }: WorkerInput,
-  onMessage: (message: WorkerMessage) => void,
-) => {
+const processMessage = async ({ arrayBuffer }: WorkerInput, onMessage: (message: WorkerMessage) => void) => {
   const zip = new JSZip();
   try {
     const contents = await zip.loadAsync(arrayBuffer);
@@ -52,8 +49,7 @@ const processMessage = async (
           // const phType = ph?.getAttribute("type");
           // const isHeading = phType === "title" || phType === "ctrTitle";
 
-          const emuToPx = (emu: string | null) =>
-            emu ? parseInt(emu) / 12700 : 0;
+          const emuToPx = (emu: string | null) => (emu ? parseInt(emu) / 12700 : 0);
 
           // 2. Extract Text + Formatting from Runs
           const paragraphs = Array.from(shape.getElementsByTagName("a:p"));
@@ -88,14 +84,9 @@ const processMessage = async (
             y: emuToPx(off?.getAttribute("y") || "0"),
             width: emuToPx(ext?.getAttribute("cx") || "0"),
             height: emuToPx(ext?.getAttribute("cy") || "0"),
-            x2:
-              emuToPx(off?.getAttribute("x") || "0") +
-              emuToPx(ext?.getAttribute("cx") || "0"),
-            y2:
-              emuToPx(off?.getAttribute("y") || "0") +
-              emuToPx(ext?.getAttribute("cy") || "0"),
-            rowBucket:
-              Math.round(emuToPx(off?.getAttribute("y") || "0") / 10) * 10,
+            x2: emuToPx(off?.getAttribute("x") || "0") + emuToPx(ext?.getAttribute("cx") || "0"),
+            y2: emuToPx(off?.getAttribute("y") || "0") + emuToPx(ext?.getAttribute("cy") || "0"),
+            rowBucket: Math.round(emuToPx(off?.getAttribute("y") || "0") / 10) * 10,
             // New Metadata fields
             metadata: {
               isBold,
@@ -108,9 +99,7 @@ const processMessage = async (
 
       // Sort: PPTX is Top-to-Bottom (y increases downwards)
       // So we use a.rowBucket - b.rowBucket (Ascending)
-      items.sort((a, b) =>
-        a.rowBucket !== b.rowBucket ? a.rowBucket - b.rowBucket : a.x - b.x,
-      );
+      items.sort((a, b) => (a.rowBucket !== b.rowBucket ? a.rowBucket - b.rowBucket : a.x - b.x));
 
       // Extract slide number from filename (e.g., slide12.xml -> 12)
       const slideNum = parseInt(path.match(/\d+/)![0]);
@@ -128,9 +117,7 @@ const processMessage = async (
     // 3. Parallel execution with concurrency limit
     const MAX_CONCURRENCY = 10; // XML parsing is lighter than PDF rendering
     for (let i = 0; i < slideFiles.length; i += MAX_CONCURRENCY) {
-      const batch = slideFiles
-        .slice(i, i + MAX_CONCURRENCY)
-        .map((path, idx) => processSlide(path, i + idx));
+      const batch = slideFiles.slice(i, i + MAX_CONCURRENCY).map((path, idx) => processSlide(path, i + idx));
       await Promise.all(batch);
     }
 
@@ -148,13 +135,9 @@ const processMessage = async (
   }
 };
 
-const FILE_TYPES = [
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-];
+const FILE_TYPES = ["application/vnd.openxmlformats-officedocument.presentationml.presentation"];
 export function PPTXToText() {
-  const [status, setStatus] = useState<
-    "idle" | "processing" | "done" | "error"
-  >("idle");
+  const [status, setStatus] = useState<"idle" | "processing" | "done" | "error">("idle");
   const [progress, setProgress] = useState({ done: 0, total: 0, percent: 0 });
   const [result, setResult] = useState("");
 
@@ -202,9 +185,7 @@ export function PPTXToText() {
         <FileUpload
           onFileUpload={handleFileUpload}
           allowedFileTypes={FILE_TYPES}
-          className={clsx(
-            status === "processing" && "pointer-events-none opacity-50",
-          )}
+          className={clsx(status === "processing" && "pointer-events-none opacity-50")}
         />
 
         {status === "processing" && (
@@ -228,10 +209,7 @@ export function PPTXToText() {
           <div className="group animate-in fade-in slide-in-from-bottom-4 relative">
             <div className="flex items-center justify-between rounded-t-lg border-2 border-b-0 border-neutral-500 bg-neutral-100 px-4 py-2">
               <span className="text-sm font-bold">Markdown Output</span>
-              <CopyToClipboard
-                getText={copyToClipboard}
-                disabled={status !== "done"}
-              />
+              <CopyToClipboard getText={copyToClipboard} disabled={status !== "done"} />
             </div>
 
             <textarea

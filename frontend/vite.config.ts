@@ -38,5 +38,14 @@ export default defineConfig({
     }),
     // analyzer(),
   ],
+  build: {
+    target: "esnext",
+  },
+  optimizeDeps: {
+    exclude: ["mupdf"],
+    esbuildOptions: {
+      target: "esnext",
+    },
+  },
   base: "/daily-utils",
 });

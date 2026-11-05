@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  CHAT_BASE_URL_STORAGE_KEY,
-  chatUrl,
-  DEFAULT_CHAT_BASE_URL,
-} from "./chatUrl";
+import { CHAT_BASE_URL_STORAGE_KEY, chatUrl, DEFAULT_CHAT_BASE_URL } from "./chatUrl";
 import type { Conversation } from "./types";
 
 const value = (item: unknown) => {
@@ -12,18 +8,11 @@ const value = (item: unknown) => {
   return String(item);
 };
 
-export function ConversationMetadata({
-  conversation,
-}: {
-  conversation: Conversation | null;
-}) {
+export function ConversationMetadata({ conversation }: { conversation: Conversation | null }) {
   const [copied, setCopied] = useState(false);
   const [baseUrl, setBaseUrl] = useState(() => {
     if (typeof window === "undefined") return DEFAULT_CHAT_BASE_URL;
-    return (
-      window.localStorage.getItem(CHAT_BASE_URL_STORAGE_KEY) ??
-      DEFAULT_CHAT_BASE_URL
-    );
+    return window.localStorage.getItem(CHAT_BASE_URL_STORAGE_KEY) ?? DEFAULT_CHAT_BASE_URL;
   });
 
   useEffect(() => {
@@ -56,9 +45,7 @@ export function ConversationMetadata({
         {fields.map(([label, item]) => (
           <div key={label}>
             <dt className="font-bold text-neutral-500">{label}</dt>
-            <dd className="break-words whitespace-pre-wrap text-neutral-800">
-              {value(item)}
-            </dd>
+            <dd className="break-words whitespace-pre-wrap text-neutral-800">{value(item)}</dd>
           </div>
         ))}
         <div className="sm:col-span-2">
@@ -88,9 +75,7 @@ export function ConversationMetadata({
         </div>
         <div className="sm:col-span-2">
           <dt className="font-bold text-neutral-500">Prompt</dt>
-          <dd className="break-words whitespace-pre-wrap text-neutral-800">
-            {value(conversation.prompt)}
-          </dd>
+          <dd className="break-words whitespace-pre-wrap text-neutral-800">{value(conversation.prompt)}</dd>
         </div>
       </dl>
     </section>

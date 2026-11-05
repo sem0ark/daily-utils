@@ -22,9 +22,7 @@ export const CommandMenu = ({
   });
 
   const sortedItems = useMemo(() => {
-    return [...NAVIGATION_CONFIG].sort(
-      (a, b) => history.indexOf(b.path) - history.indexOf(a.path),
-    );
+    return [...NAVIGATION_CONFIG].sort((a, b) => history.indexOf(b.path) - history.indexOf(a.path));
   }, [history]);
 
   const makeGoTo = useCallback(
@@ -41,14 +39,9 @@ export const CommandMenu = ({
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      const isInInput = ["INPUT", "TEXTAREA"].includes(
-        (e.target as HTMLElement).tagName,
-      );
+      const isInInput = ["INPUT", "TEXTAREA"].includes((e.target as HTMLElement).tagName);
 
-      if (
-        ["k", "e", "p", "/"].includes(e.key) &&
-        (e.metaKey || e.ctrlKey || !isInInput)
-      ) {
+      if (["k", "e", "p", "/"].includes(e.key) && (e.metaKey || e.ctrlKey || !isInInput)) {
         e.preventDefault();
         setOpen((prev) => !prev);
       }
@@ -67,9 +60,7 @@ export const CommandMenu = ({
     >
       <VisuallyHidden.Root>
         <Dialog.Title>Command pallette.</Dialog.Title>
-        <Dialog.Description>
-          Search for tools, navigate pages, and access recently used utilities.
-        </Dialog.Description>
+        <Dialog.Description>Search for tools, navigate pages, and access recently used utilities.</Dialog.Description>
       </VisuallyHidden.Root>
 
       <div className="w-full max-w-lg overflow-hidden rounded-xl border border-neutral-200 bg-white">
@@ -80,14 +71,9 @@ export const CommandMenu = ({
         />
 
         <Command.List className="max-h-[500px] overflow-y-auto p-2">
-          <Command.Empty className="p-4 text-sm text-neutral-500">
-            No results found.
-          </Command.Empty>
+          <Command.Empty className="p-4 text-sm text-neutral-500">No results found.</Command.Empty>
 
-          <Command.Group
-            heading="Navigation"
-            className="flex flex-col gap-2 px-2 font-semibold text-neutral-500"
-          >
+          <Command.Group heading="Navigation" className="flex flex-col gap-2 px-2 font-semibold text-neutral-500">
             {sortedItems
               .filter((item) => item.showInCommandMenu)
               .map((item) => (
@@ -101,9 +87,7 @@ export const CommandMenu = ({
                   <span>
                     <div className="flex flex-col">
                       <span>{item.name}</span>
-                      {item.description && (
-                        <span className="font-normal">{item.description}</span>
-                      )}
+                      {item.description && <span className="font-normal">{item.description}</span>}
                     </div>
                   </span>
                 </Command.Item>

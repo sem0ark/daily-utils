@@ -12,9 +12,7 @@ const isMac = () => {
 
 const getModKey = () => (isMac() ? "⌘" : "Ctrl");
 
-export const Layout = ({
-  children,
-}: PropsWithChildren<{ children?: React.ReactNode }>) => {
+export const Layout = ({ children }: PropsWithChildren<{ children?: React.ReactNode }>) => {
   const [open, setOpen] = useState(false);
   const isOnline = useOfflineStatus();
 
@@ -42,9 +40,7 @@ export const Layout = ({
 
           <div className="h-full p-2">
             <WifiIcon
-              className={
-                isOnline ? "size-5 text-neutral-500" : "size-5 text-red-500"
-              }
+              className={isOnline ? "size-5 text-neutral-500" : "size-5 text-red-500"}
               title={isOnline ? "Currently online." : "No internet connection."}
             />
           </div>

@@ -78,10 +78,7 @@ export interface SegmentationResult {
   };
 }
 
-function parseWordsFromTranscript(
-  data: TranscriptData,
-  maxWords?: number,
-): Word[] {
+function parseWordsFromTranscript(data: TranscriptData, maxWords?: number): Word[] {
   const words: Word[] = [];
   const events = data.events ?? [];
 
@@ -285,11 +282,7 @@ function kdeAnalyzeGaps(
   return { threshold, densityX, densityY, valleys, peaks, bandwidth };
 }
 
-function computeSentenceBoundaryScores(
-  words: Word[],
-  gaps: number[],
-  sentenceGapThreshold: number | null,
-): number[] {
+function computeSentenceBoundaryScores(words: Word[], gaps: number[], sentenceGapThreshold: number | null): number[] {
   if (gaps.length === 0) return [];
 
   // Robust statistics — immune to long lecture pauses
@@ -327,10 +320,7 @@ function computeSentenceBoundaryScores(
 
     if (words[i].isEventEnd) score += 1.5;
 
-    if (
-      currentText.replace(/[.,!?;:]/g, "").length <= 2 &&
-      !endsWithSentencePunctuation(currentText)
-    ) {
+    if (currentText.replace(/[.,!?;:]/g, "").length <= 2 && !endsWithSentencePunctuation(currentText)) {
       score -= 0.5;
     }
 
@@ -346,11 +336,7 @@ function detectSentenceBoundaries(
   threshold: number,
   sentenceGapThreshold: number | null,
 ): number[] {
-  const scores = computeSentenceBoundaryScores(
-    words,
-    gaps,
-    sentenceGapThreshold,
-  );
+  const scores = computeSentenceBoundaryScores(words, gaps, sentenceGapThreshold);
   const boundaries: number[] = [];
 
   for (let i = 0; i < scores.length; i++) {
@@ -360,10 +346,7 @@ function detectSentenceBoundaries(
   }
 
   const lastIdx = words.length - 1;
-  if (
-    boundaries.length === 0 ||
-    boundaries[boundaries.length - 1] !== lastIdx
-  ) {
+  if (boundaries.length === 0 || boundaries[boundaries.length - 1] !== lastIdx) {
     boundaries.push(lastIdx);
   }
 
@@ -397,10 +380,7 @@ function buildSentences(words: Word[], boundaryIndices: number[]): Sentence[] {
   return sentences;
 }
 
-function buildParagraphs(
-  sentences: Sentence[],
-  boundaryIndices: number[],
-): Paragraph[] {
+function buildParagraphs(sentences: Sentence[], boundaryIndices: number[]): Paragraph[] {
   const paragraphs: Paragraph[] = [];
   let prevIdx = 0;
 
@@ -448,13 +428,7 @@ function detectParagraphBoundaries(
     return { boundaries: [sentences.length - 1], kdeAnalysis: null };
   }
 
-  const kdeAnalysis = kdeAnalyzeGaps(
-    gaps,
-    bandwidthScale,
-    fallbackQuantile,
-    nSamples,
-    winsorizeAt,
-  );
+  const kdeAnalysis = kdeAnalyzeGaps(gaps, bandwidthScale, fallbackQuantile, nSamples, winsorizeAt);
 
   const boundaries: number[] = [];
   for (let i = 0; i < gaps.length; i++) {
@@ -464,10 +438,7 @@ function detectParagraphBoundaries(
   }
 
   const lastIdx = sentences.length - 1;
-  if (
-    boundaries.length === 0 ||
-    boundaries[boundaries.length - 1] !== lastIdx
-  ) {
+  if (boundaries.length === 0 || boundaries[boundaries.length - 1] !== lastIdx) {
     boundaries.push(lastIdx);
   }
 
@@ -477,10 +448,7 @@ function detectParagraphBoundaries(
   };
 }
 
-export function segmentTranscript(
-  data: TranscriptData,
-  options: SegmentationOptions = {},
-): SegmentationResult {
+export function segmentTranscript(data: TranscriptData, options: SegmentationOptions = {}): SegmentationResult {
   const {
     sentenceThreshold = 6.0,
     paragraphBandwidthScale = 1.5,
@@ -526,11 +494,7 @@ export function segmentTranscript(
   }
 
   // Sentence boundary detection
-  const sentenceBoundaryScores = computeSentenceBoundaryScores(
-    words,
-    interWordGaps,
-    sentenceGapThreshold,
-  );
+  const sentenceBoundaryScores = computeSentenceBoundaryScores(words, interWordGaps, sentenceGapThreshold);
   const sentenceBoundaryIndices = detectSentenceBoundaries(
     words,
     interWordGaps,
@@ -543,20 +507,17 @@ export function segmentTranscript(
   // Inter-sentence gaps
   const interSentenceGaps: number[] = [];
   for (let i = 1; i < sentences.length; i++) {
-    interSentenceGaps.push(
-      Math.max(0, sentences[i].startMs - sentences[i - 1].endMs),
-    );
+    interSentenceGaps.push(Math.max(0, sentences[i].startMs - sentences[i - 1].endMs));
   }
 
   // Paragraph boundaries
-  const { boundaries: paraBoundaryIndices, kdeAnalysis: paragraphGapKde } =
-    detectParagraphBoundaries(
-      sentences,
-      paragraphBandwidthScale,
-      fallbackQuantile,
-      kdeSamples,
-      winsorizePercentile,
-    );
+  const { boundaries: paraBoundaryIndices, kdeAnalysis: paragraphGapKde } = detectParagraphBoundaries(
+    sentences,
+    paragraphBandwidthScale,
+    fallbackQuantile,
+    kdeSamples,
+    winsorizePercentile,
+  );
 
   const paragraphs = buildParagraphs(sentences, paraBoundaryIndices);
 

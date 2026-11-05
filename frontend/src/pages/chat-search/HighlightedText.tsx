@@ -1,7 +1,6 @@
 import type { RefObject } from "react";
 
-const escapeRegExp = (value: string) =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export function HighlightedText({
   text,
@@ -21,19 +20,13 @@ export function HighlightedText({
   return (
     <>
       {parts.map((part, index) => {
-        const isMatch = terms.some((term) =>
-          new RegExp(`^${term}$`, "i").test(part),
-        );
+        const isMatch = terms.some((term) => new RegExp(`^${term}$`, "i").test(part));
         if (!isMatch) return part;
 
         const ref = !hasMatch ? firstMatchRef : undefined;
         hasMatch = true;
         return (
-          <mark
-            key={`${part}-${index}`}
-            ref={ref}
-            className="rounded bg-yellow-200 px-0.5 text-neutral-900"
-          >
+          <mark key={`${part}-${index}`} ref={ref} className="rounded bg-yellow-200 px-0.5 text-neutral-900">
             {part}
           </mark>
         );

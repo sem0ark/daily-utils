@@ -54,11 +54,7 @@ export const CopyTextEntryDirect = ({
           ))}
         </div>
 
-        <CopyToClipboard
-          enableHotkeys={enableHotkeys}
-          getText={() => onCopy(texts)}
-          bigger
-        />
+        <CopyToClipboard enableHotkeys={enableHotkeys} getText={() => onCopy(texts)} bigger />
       </div>
     </div>
   );

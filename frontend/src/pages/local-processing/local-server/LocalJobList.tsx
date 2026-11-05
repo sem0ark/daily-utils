@@ -26,17 +26,10 @@ export const LocalJobList = ({
             </div>
             {job.status !== "completed" && job.status !== "failed" && (
               <div className="mt-2 h-2 overflow-hidden rounded-sm border border-neutral-400 bg-neutral-100">
-                <div
-                  className="h-full bg-blue-500 transition-all duration-300"
-                  style={{ width: `${job.progress}%` }}
-                />
+                <div className="h-full bg-blue-500 transition-all duration-300" style={{ width: `${job.progress}%` }} />
               </div>
             )}
-            {job.error && (
-              <div className="mt-1 text-sm font-bold text-red-600">
-                {job.error}
-              </div>
-            )}
+            {job.error && <div className="mt-1 text-sm font-bold text-red-600">{job.error}</div>}
           </div>
           <div className="flex shrink-0 gap-2">
             {job.status !== "completed" && job.status !== "failed" && (

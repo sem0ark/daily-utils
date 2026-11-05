@@ -14,16 +14,13 @@ export const LocalOCR = () => (
 const LocalOCRContent = () => {
   const { isAvailable, processors } = useLocalServerDiscovery();
   const isEnabled = isAvailable && processors.includes("ocr");
-  const { runJob, cancelJob, downloadJob, previewJob, history } =
-    useLocalJob("ocr");
+  const { runJob, cancelJob, downloadJob, previewJob, history } = useLocalJob("ocr");
   return (
     <div className="mx-auto max-w-4xl">
       <h1 className="mb-8 text-center text-3xl font-bold">Local OCR</h1>
 
       <div className="flex flex-col gap-6">
-        <p className="text-neutral-600">
-          Send a PDF, image, or ZIP archive of images to your local OCR server.
-        </p>
+        <p className="text-neutral-600">Send a PDF, image, or ZIP archive of images to your local OCR server.</p>
         <LocalProcessorNotice processor="ocr" />
 
         {isEnabled && (
@@ -39,8 +36,7 @@ const LocalOCRContent = () => {
           <LocalJobList
             jobs={history}
             onCancel={(job) => {
-              if (window.confirm("Are you sure you want to cancel this job?"))
-                void cancelJob(job.job_id);
+              if (window.confirm("Are you sure you want to cancel this job?")) void cancelJob(job.job_id);
             }}
             onDownload={(job) => void downloadJob(job)}
             onPreview={(job) => void previewJob(job)}

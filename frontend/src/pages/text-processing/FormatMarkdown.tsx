@@ -1,11 +1,5 @@
 import { CopyTextEntryDirect } from "../../common/components/copyTextEntry";
-import {
-  joinFunctions,
-  replaceUnicode,
-  removeEmoji,
-  trimLines,
-  replaceMarkdownElements,
-} from "./textProcessing";
+import { joinFunctions, replaceUnicode, removeEmoji, trimLines, replaceMarkdownElements } from "./textProcessing";
 
 const onPaste = joinFunctions(replaceUnicode, removeEmoji, trimLines);
 

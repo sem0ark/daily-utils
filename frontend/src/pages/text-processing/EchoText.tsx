@@ -12,13 +12,7 @@ import {
   splitIntoChunks,
 } from "./textProcessing";
 
-const processChunk = joinFunctions(
-  replaceUnicode,
-  escapeGenerics,
-  trimLines,
-  escapeLeadingWhitespace,
-  escapeDollar,
-);
+const processChunk = joinFunctions(replaceUnicode, escapeGenerics, trimLines, escapeLeadingWhitespace, escapeDollar);
 
 const CopyTextEntry = ({
   onCopy,
@@ -27,11 +21,7 @@ const CopyTextEntry = ({
   onCopy: (text: string) => string;
   enableHotkeys?: boolean;
 }) => {
-  const {
-    onClick: copyFromClipboard,
-    text: pastedText,
-    isPasted,
-  } = usePasteFromClipboard();
+  const { onClick: copyFromClipboard, text: pastedText, isPasted } = usePasteFromClipboard();
   const destinationRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [chunks, setChunks] = useState<string[]>([]);
@@ -67,24 +57,15 @@ const CopyTextEntry = ({
 
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
-        if (
-          !(mutation.type === "childList" || mutation.type === "characterData")
-        )
-          return;
+        if (!(mutation.type === "childList" || mutation.type === "characterData")) return;
 
         const target = mutation.target as Node;
-        const targetElement =
-          target.nodeType === Node.ELEMENT_NODE
-            ? (target as HTMLElement)
-            : target.parentElement;
+        const targetElement = target.nodeType === Node.ELEMENT_NODE ? (target as HTMLElement) : target.parentElement;
 
         const chunkElement = targetElement?.closest("[data-chunk-index]");
         if (!chunkElement) return;
 
-        const index = parseInt(
-          chunkElement.getAttribute("data-chunk-index") || "-1",
-          10,
-        );
+        const index = parseInt(chunkElement.getAttribute("data-chunk-index") || "-1", 10);
         if (index === -1) return;
 
         const original = originalChunks[index];
@@ -133,10 +114,7 @@ const CopyTextEntry = ({
         </div>
       </div>
 
-      <div
-        ref={destinationRef}
-        className={"w-full overflow-hidden p-2 text-[6px]"}
-      >
+      <div ref={destinationRef} className={"w-full overflow-hidden p-2 text-[6px]"}>
         {chunks.map((chunk, index) => {
           const processed = processChunk(chunk);
           return (

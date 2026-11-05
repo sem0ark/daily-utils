@@ -52,9 +52,7 @@ interface SearchDocument {
 const toSearchDocument = (conversation: Conversation): SearchDocument => ({
   id: conversation.id,
   title: conversation.name ?? "Untitled chat",
-  messages: conversation.messages
-    .map((message) => message.content ?? "")
-    .join("\n"),
+  messages: conversation.messages.map((message) => message.content ?? "").join("\n"),
 });
 
 const queryTerms = (query: string) =>
@@ -122,9 +120,7 @@ export class ChatSearchEngine {
     if (!query.trim()) return { results: [], isBroadMatch: false };
 
     const search = (combineWith: "AND" | "OR") =>
-      this.index
-        .search(query, { combineWith })
-        .filter((result) => result.score > MIN_SCORE);
+      this.index.search(query, { combineWith }).filter((result) => result.score > MIN_SCORE);
     let rawResults = search("AND");
     const isBroadMatch = rawResults.length === 0;
     if (isBroadMatch) rawResults = search("OR");

@@ -2,10 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { localApi } from "./api";
 import type { JobStatus, JobStatusResponse } from "./types";
 
-export function useLocalJob(
-  processor: string,
-  resultMode: "pages" | "file" = "pages",
-) {
+export function useLocalJob(processor: string, resultMode: "pages" | "file" = "pages") {
   const [status, setStatus] = useState<JobStatus | "idle">("idle");
   const [progress, setProgress] = useState(0);
   const [pagesCompleted, setPagesCompleted] = useState(0);
@@ -112,10 +109,7 @@ export function useLocalJob(
       if (resultMode === "file") {
         const artifacts = await localApi.getArtifacts(job.job_id);
         for (const artifact of artifacts.files) {
-          const blob = await localApi.getArtifact(
-            job.job_id,
-            artifact.file_name,
-          );
+          const blob = await localApi.getArtifact(job.job_id, artifact.file_name);
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = url;
@@ -125,10 +119,9 @@ export function useLocalJob(
         }
         return;
       }
-      const blob = new Blob(
-        [(await localApi.getResult(job.job_id)).join("\n\n---\n\n")],
-        { type: "text/plain;charset=utf-8" },
-      );
+      const blob = new Blob([(await localApi.getResult(job.job_id)).join("\n\n---\n\n")], {
+        type: "text/plain;charset=utf-8",
+      });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -166,16 +159,11 @@ export function useLocalJob(
         const jobs = await localApi.listJobs(processor);
         if (isCancelled) return;
         setHistory(jobs);
-        if (
-          jobs.some(
-            (job) => job.status !== "completed" && job.status !== "failed",
-          )
-        ) {
+        if (jobs.some((job) => job.status !== "completed" && job.status !== "failed")) {
           historyTimer = window.setTimeout(() => void poll(), 1000);
         }
       } catch {
-        if (!isCancelled)
-          historyTimer = window.setTimeout(() => void poll(), 1000);
+        if (!isCancelled) historyTimer = window.setTimeout(() => void poll(), 1000);
       }
     };
 

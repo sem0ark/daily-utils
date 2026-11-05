@@ -22,8 +22,7 @@ export function ChatSearch() {
   const [importStats, setImportStats] = useState<ImportStats | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const selectedConversation =
-    conversations.find(({ id }) => id === selectedId) ?? null;
+  const selectedConversation = conversations.find(({ id }) => id === selectedId) ?? null;
 
   const refresh = useCallback(async () => {
     const records = await chatDb.conversations.toArray();
@@ -84,8 +83,7 @@ export function ChatSearch() {
       <h1 className="mb-8 text-center text-3xl font-bold">Chat Search</h1>
       <div className="flex flex-col gap-6">
         <p className="text-neutral-600">
-          Import exported chat JSON files and search them locally. Your data
-          never leaves this browser.
+          Import exported chat JSON files and search them locally. Your data never leaves this browser.
         </p>
 
         <FileUpload
@@ -94,19 +92,14 @@ export function ChatSearch() {
           className={isImporting ? "pointer-events-none opacity-50" : undefined}
         />
 
-        {isImporting && (
-          <p className="font-bold text-blue-500">Importing conversations...</p>
-        )}
+        {isImporting && <p className="font-bold text-blue-500">Importing conversations...</p>}
         {importStats && (
           <div className="rounded-lg border-2 border-neutral-500 bg-neutral-100 p-4">
-            Added {importStats.added}, updated {importStats.updated}, skipped{" "}
-            {importStats.skipped}.
+            Added {importStats.added}, updated {importStats.updated}, skipped {importStats.skipped}.
           </div>
         )}
         {error && (
-          <div className="rounded-lg border-2 border-red-500 bg-red-50 p-4 font-bold text-red-600">
-            {error}
-          </div>
+          <div className="rounded-lg border-2 border-red-500 bg-red-50 p-4 font-bold text-red-600">{error}</div>
         )}
 
         <div className="relative">
@@ -136,16 +129,8 @@ export function ChatSearch() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[minmax(18rem,24rem)_minmax(0,1fr)]">
-          <ConversationResults
-            entries={results}
-            query={query}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-          />
-          <ConversationPreview
-            conversation={selectedConversation}
-            query={query}
-          />
+          <ConversationResults entries={results} query={query} selectedId={selectedId} onSelect={setSelectedId} />
+          <ConversationPreview conversation={selectedConversation} query={query} />
         </div>
         <ConversationMetadata conversation={selectedConversation} />
       </div>

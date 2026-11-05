@@ -7,8 +7,7 @@ export interface ParsedTranscript {
   data: TranscriptData;
 }
 
-const SRT_TIMECODE =
-  /^(\d{2}):(\d{2}):(\d{2})[,.](\d{3})\s+-->\s+(\d{2}):(\d{2}):(\d{2})[,.](\d{3})(?:\s+.*)?$/;
+const SRT_TIMECODE = /^(\d{2}):(\d{2}):(\d{2})[,.](\d{3})\s+-->\s+(\d{2}):(\d{2}):(\d{2})[,.](\d{3})(?:\s+.*)?$/;
 const SRT_TIMESTAMP = /^(\d{2}):(\d{2}):(\d{2})[,.](\d{3})$/;
 const OFFICE_TIMESTAMP = /^(\d+):(\d{2}):(\d{2})(?:\.(\d+))?$/;
 const OFFICE_SCHEMA = "http://stream.office.com/schemas/transcript.json";
@@ -54,8 +53,7 @@ function parseTimecodeLine(line: string): { startMs: number; endMs: number } {
   const startMs = timestampToMilliseconds(start);
   const endMs = timestampToMilliseconds(end);
 
-  if (endMs < startMs)
-    throw new Error("SRT end time cannot precede start time");
+  if (endMs < startMs) throw new Error("SRT end time cannot precede start time");
   return { startMs, endMs };
 }
 
@@ -120,8 +118,7 @@ export function parseJson3(input: string): TranscriptData {
       tStartMs: typeof event.tStartMs === "number" ? event.tStartMs : undefined,
       segs: event.segs?.map((segment) => ({
         utf8: typeof segment.utf8 === "string" ? segment.utf8 : undefined,
-        tOffsetMs:
-          typeof segment.tOffsetMs === "number" ? segment.tOffsetMs : undefined,
+        tOffsetMs: typeof segment.tOffsetMs === "number" ? segment.tOffsetMs : undefined,
       })),
     })),
   };
@@ -141,20 +138,12 @@ export function parseOfficeTranscript(input: string): TranscriptData {
 
   return {
     events: value.entries.map((entry) => {
-      if (
-        typeof entry.text !== "string" ||
-        typeof entry.startOffset !== "string"
-      ) {
-        throw new Error(
-          "Office transcript entries require text and startOffset",
-        );
+      if (typeof entry.text !== "string" || typeof entry.startOffset !== "string") {
+        throw new Error("Office transcript entries require text and startOffset");
       }
 
       const text = entry.text.trim();
-      const speaker =
-        typeof entry.speakerDisplayName === "string"
-          ? entry.speakerDisplayName.trim()
-          : "";
+      const speaker = typeof entry.speakerDisplayName === "string" ? entry.speakerDisplayName.trim() : "";
       return {
         tStartMs: officeTimestampToMilliseconds(entry.startOffset),
         segs: text
@@ -207,8 +196,7 @@ export function parseSrt(input: string): TranscriptData {
     });
   }
 
-  if (events.length === 0)
-    throw new Error("No valid SRT subtitle entries found");
+  if (events.length === 0) throw new Error("No valid SRT subtitle entries found");
   return { events };
 }
 

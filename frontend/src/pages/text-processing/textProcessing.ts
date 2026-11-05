@@ -4,9 +4,7 @@ export function escapeLeadingWhitespace(text: string): string {
     .split("\n")
     .map((line) => {
       const leadingWhitespaceMatch = line.match(/^(\s*)/);
-      const leadingWhitespace = leadingWhitespaceMatch
-        ? leadingWhitespaceMatch[1]
-        : "";
+      const leadingWhitespace = leadingWhitespaceMatch ? leadingWhitespaceMatch[1] : "";
       const trimmedText = line.trimStart();
 
       if (leadingWhitespace.length > 1 && trimmedText.length > 1) {
@@ -26,11 +24,7 @@ export function trimLines(text: string): string {
 }
 
 export function escapeDollar(text: string): string {
-  const replacer = (
-    _match: string,
-    dollarSigns: string,
-    content: string,
-  ): string => {
+  const replacer = (_match: string, dollarSigns: string, content: string): string => {
     return `<pre>${dollarSigns}${content}${dollarSigns}</pre>`;
   };
 
@@ -44,10 +38,7 @@ export function escapeDollar(text: string): string {
    * 6. \2            - Match the same number of dollars
    * 7. (?!\$)        - No dollar sign after
    */
-  return text.replace(
-    /(?<!\$)(\${1,2})([^\s$](?:[^$]*?[^\s$])?)\1(?!\$)/g,
-    replacer,
-  );
+  return text.replace(/(?<!\$)(\${1,2})([^\s$](?:[^$]*?[^\s$])?)\1(?!\$)/g, replacer);
 }
 
 export function escapeNewLine(text: string): string {
@@ -73,11 +64,8 @@ export function removeEmoji(text: string): string {
   return text.replace(/\p{Extended_Pictographic}/gu, "");
 }
 
-export function joinFunctions(
-  ...functions: ((text: string) => string)[]
-): (text: string) => string {
-  return (initial_text: string) =>
-    functions.reduce((text, f) => f(text), initial_text);
+export function joinFunctions(...functions: ((text: string) => string)[]): (text: string) => string {
+  return (initial_text: string) => functions.reduce((text, f) => f(text), initial_text);
 }
 
 export function splitIntoChunks(text: string): string[] {
